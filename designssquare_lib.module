@@ -61,6 +61,7 @@ function include_blocks(&$vars){
     //retrieve context plugin as alternative for managing blocks
     $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '' ;
     foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
+//        drupal_static_reset('block_list');
         if(block_get_blocks_by_region($region_key)) {
             $blocks = block_get_blocks_by_region($region_key);
         }
@@ -92,6 +93,9 @@ function include_blocks(&$vars){
 
         // Get the content for each region and add it to the $region variable
         $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
+        unset($all_blocks);
+        unset($blocks);
+        unset($ctx_blocks);
     }
 }
 
@@ -255,3 +259,27 @@ function remove_uri_version($uri, $filename){
     }
 }
 
+/********Menu********/
+function designssquare_lib_menu() {
+    $items['admin/designs-square'] = array(
+        'title' => 'DesignsSquare.com',
+        'description' => 'Menu system for DesignsSquare.com products.',
+        'page callback' => 'register_ds_page',
+        'access arguments' => array('access administration pages'),
+        'weight' => 50,
+//        'access callback' => TRUE,
+    );
+
+    return $items;
+}
+
+function register_ds_page() {
+    $build = array(
+        'header_text' => array(
+            '#type' => 'markup',
+            '#markup' => '<p class="lead">' . t('DesginsSquare.com Products') . '</p>',
+        ),
+//        'example_form' => drupal_get_form('fruit_simple_form'),
+    );
+    return $build;
+}
