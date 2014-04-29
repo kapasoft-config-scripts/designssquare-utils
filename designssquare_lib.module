@@ -2,7 +2,8 @@
 
 //to include artifacts from theme scope
 //i.e._theme_include('bazar','/includes/template_api.inc');
-function theme_include($theme, $path) {
+function theme_include($theme, $path)
+{
     static $themes = array();
     if (!isset($themes[$theme])) {
         $themes[$theme] = drupal_get_path('theme', $theme);
@@ -13,7 +14,8 @@ function theme_include($theme, $path) {
 }
 
 
-function get_field_name_from_vocabulary($vocabulary_name, $entity_type = NULL){
+function get_field_name_from_vocabulary($vocabulary_name, $entity_type = NULL)
+{
     foreach (field_info_fields() as $field_name => $field) {
         if ($field['type'] == "taxonomy_term_reference" && $field['settings']['allowed_values'][0]['vocabulary'] == $vocabulary_name) {
             // Add this field to the return array if no entity type was specified or
@@ -27,12 +29,31 @@ function get_field_name_from_vocabulary($vocabulary_name, $entity_type = NULL){
 
 }
 
-function get_referencing_product_display_id($product) {
+//returns all the bundles of entity instances that references a field instance with a given type
+function get_bundles_for_field_type($field_type)
+{
+    $field_map = field_info_field_map();
+    $bundles = array();
+    foreach ($field_map as $field_name => $item) {
+        if ($item['type'] == $field_type) {
+            foreach ($item['bundles'] as $bundle_list) {
+                foreach ($bundle_list as $bundle) {
+                    $bundles[] = $bundle;
+                }
+            }
+        }
+    }
+
+    return array_unique($bundles);
+}
+
+function get_referencing_product_display_id($product)
+{
     global $language;
 
-    if(isset($product->display_id)){
+    if (isset($product->display_id)) {
         return $product->display_id;
-    }else{
+    } else {
         // Iterate through fields which refer to products.
         foreach (commerce_info_fields('commerce_product_reference') as $field) {
             // Build query.
@@ -55,21 +76,22 @@ function get_referencing_product_display_id($product) {
 }
 
 //includes blocks in current scope(i.e html, node,etc) and places them in $region['block_id'] variable
-function include_blocks(&$vars){
+function include_blocks(&$vars)
+{
     $all_blocks = array();
     //making blocks available
     //retrieve context plugin as alternative for managing blocks
-    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '' ;
+    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
     foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
 //        drupal_static_reset('block_list');
-        if(block_get_blocks_by_region($region_key)) {
+        if (block_get_blocks_by_region($region_key)) {
             $blocks = block_get_blocks_by_region($region_key);
         }
-        if(!empty($ctx_plugin)){
+        if (!empty($ctx_plugin)) {
             $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
         }
 
-        if(isset($ctx_blocks) && isset($blocks)) {
+        if (isset($ctx_blocks) && isset($blocks)) {
             //there are blocks from the context and from blocks module
             $all_blocks = array_merge($blocks, $ctx_blocks);
 
@@ -83,10 +105,10 @@ function include_blocks(&$vars){
                 }
             }
 
-        }elseif(isset($ctx_blocks)){
+        } elseif (isset($ctx_blocks)) {
             //there are blocks ONLY from context module
             $all_blocks = $ctx_blocks;
-        }elseif(isset($blocks)){
+        } elseif (isset($blocks)) {
             //there are blocks ONLY from block module
             $all_blocks = $blocks;
         }
@@ -100,88 +122,92 @@ function include_blocks(&$vars){
 }
 
 
-function include_blocks_from_region($region_key, &$vars){
+function include_blocks_from_region($region_key, &$vars)
+{
     $all_blocks = array();
     //making blocks available
     //retrieve context plugin as alternative for managing blocks
-    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '' ;
+    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
 //    foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
-        if(block_get_blocks_by_region($region_key)) {
-            $blocks = block_get_blocks_by_region($region_key);
-        }
-        if(!empty($ctx_plugin)){
-            $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
-        }
+    if (block_get_blocks_by_region($region_key)) {
+        $blocks = block_get_blocks_by_region($region_key);
+    }
+    if (!empty($ctx_plugin)) {
+        $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
+    }
 
-        if(isset($ctx_blocks) && isset($blocks)) {
-            //there are blocks from the context as well from blocks module
-            $all_blocks = array_merge($blocks, $ctx_blocks);
+    if (isset($ctx_blocks) && isset($blocks)) {
+        //there are blocks from the context as well from blocks module
+        $all_blocks = array_merge($blocks, $ctx_blocks);
 
-            //sort the blocks merged
-            $all_blocks['#sorted'] = FALSE;
+        //sort the blocks merged
+        $all_blocks['#sorted'] = FALSE;
 
-            //maintain weights
-            foreach ($all_blocks as &$block) {
-                if (isset($block['#block']->weight)) {
-                    $block['#weight'] = $block['#block']->weight;
-                }
+        //maintain weights
+        foreach ($all_blocks as &$block) {
+            if (isset($block['#block']->weight)) {
+                $block['#weight'] = $block['#block']->weight;
             }
-
-        }elseif(isset($ctx_blocks)){
-            $all_blocks = $ctx_blocks;
-        }elseif(isset($blocks)){
-            $all_blocks = $blocks;
         }
 
-        // Get the content for each region and add it to the $region variable
-        $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
+    } elseif (isset($ctx_blocks)) {
+        $all_blocks = $ctx_blocks;
+    } elseif (isset($blocks)) {
+        $all_blocks = $blocks;
+    }
+
+    // Get the content for each region and add it to the $region variable
+    $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
 //    }
 }
 
 //determines if current taxonomy term is part of commerce_product
-function is_product_taxonomy(){
-    if(arg(0) == 'taxonomy'){
+function is_product_taxonomy()
+{
+    if (arg(0) == 'taxonomy') {
         //taxonomy
         $tid = arg(2);
         $term = taxonomy_term_load($tid);
         //retrieve all fields and filter for the particular taxonomy loaded
         foreach (field_info_field_map() as $field_name => $field) {
-            if($field['type'] == "taxonomy_term_reference" && $field_name == 'field_'.$term->vocabulary_machine_name && array_key_exists('commerce_product', $field['bundles'])){
+            if ($field['type'] == "taxonomy_term_reference" && $field_name == 'field_' . $term->vocabulary_machine_name && array_key_exists('commerce_product', $field['bundles'])) {
                 return true;
             }
         }
-    }else{
+    } else {
         //not a taxonomy term
         return false;
     }
 }
 
-function get_template_path($module_name, $template_name){
-    $path_to_theme_templates = path_to_theme().'/templates';
-    $path_to_widget_templates = drupal_get_path('module', $module_name).'/templates';
+function get_template_path($module_name, $template_name)
+{
+    $path_to_theme_templates = path_to_theme() . '/templates';
+    $path_to_widget_templates = drupal_get_path('module', $module_name) . '/templates';
 
-    if(file_exists($path_to_theme_templates.'/'.$template_name.'.tpl.php')){
+    if (file_exists($path_to_theme_templates . '/' . $template_name . '.tpl.php')) {
         return $path_to_theme_templates;
-    }else{
+    } else {
         return $path_to_widget_templates;
     }
 }
 
 //moves blocks from one sidebar to another depending on the taxonomy specified to left, right or none
-function move_blocks_for_sidebars(&$context, $term_id_of_sidebar){
+function move_blocks_for_sidebars(&$context, $term_id_of_sidebar)
+{
     $post_sidebar = taxonomy_term_load($term_id_of_sidebar);
 
-    if((isset($post_sidebar->name)) && ($post_sidebar->name == 'right' || $post_sidebar->name == 'left')){
+    if ((isset($post_sidebar->name)) && ($post_sidebar->name == 'right' || $post_sidebar->name == 'left')) {
         $sidebar_pos = _get_sidebar_pos($post_sidebar->name);
-        foreach($context->reactions['block']['blocks'] as $key => $block){
-            if($block['region'] == $sidebar_pos['from']){
+        foreach ($context->reactions['block']['blocks'] as $key => $block) {
+            if ($block['region'] == $sidebar_pos['from']) {
                 //move sidebar to another side
                 $context->reactions['block']['blocks'][$key]['region'] = $sidebar_pos['to'];
             }
         }
-    }elseif((isset($post_sidebar->name)) && $post_sidebar->name == 'none'){
-        foreach($context->reactions['block']['blocks'] as $key => $block){
-            if($block['region'] == 'sidebar_first' || $block['region'] == 'sidebar_second'){
+    } elseif ((isset($post_sidebar->name)) && $post_sidebar->name == 'none') {
+        foreach ($context->reactions['block']['blocks'] as $key => $block) {
+            if ($block['region'] == 'sidebar_first' || $block['region'] == 'sidebar_second') {
                 //remove any sidebar content
                 unset($context->reactions['block']['blocks'][$key]);
             }
@@ -191,23 +217,24 @@ function move_blocks_for_sidebars(&$context, $term_id_of_sidebar){
 
 //retrieve currently loaded node from content cache
 //@return stdClass of the Node or Null if no node set in the content cache
-function get_node_from_cache(){
+function get_node_from_cache()
+{
     //get the current content from cache
     $content = drupal_set_page_content();
     //indicate that you are not adding content but just reading it by setting static variable 'system...added' to False
-    $system_main_content_added = &drupal_static('system_main_content_added');
+    $system_main_content_added = & drupal_static('system_main_content_added');
     $system_main_content_added = FALSE;
 
     //retrieve current node being loaded
 //    $current_node = array_slice($content['system_main']['nodes'],0,1);
     $current_node = null;
-    if($content){
+    if ($content) {
         //cache is set
-        $node_wrap = (isset($content['nodes'])) ? array_slice($content['nodes'],0,1) : null;
+        $node_wrap = (isset($content['nodes'])) ? array_slice($content['nodes'], 0, 1) : null;
         $current_node = (isset($node_wrap) && !empty($node_wrap)) ? array_values($node_wrap)[0]['#node'] : null;
-    }else{
+    } else {
         //cache not set, lets try to load from path
-        if((arg(0) == 'node') && arg(1) && is_numeric(arg(1))){
+        if ((arg(0) == 'node') && arg(1) && is_numeric(arg(1))) {
             $current_node = node_load(arg(1));
         }
     }
@@ -216,12 +243,13 @@ function get_node_from_cache(){
 }
 
 //adding templates to the themes scope. It is assumed that all template files are stored in folder named "templates"
-function add_templates($module, &$theme_registry){
+function add_templates($module, &$theme_registry)
+{
     //make local templates available
-    $path  = drupal_get_path('module', $module).'/templates';
+    $path = drupal_get_path('module', $module) . '/templates';
     $registry_entries = drupal_find_theme_templates($theme_registry, '.tpl.php', $path);
     //to avoid error message adding 'type'
-    foreach($registry_entries as $key => $entry){
+    foreach ($registry_entries as $key => $entry) {
         $registry_entries[$key]['type'] = 'module';
         $registry_entries[$key]['theme path'] = $path;
     }
@@ -229,38 +257,41 @@ function add_templates($module, &$theme_registry){
 }
 
 //retrieves path to an artifact relative to its module, so it can be copied in current Drupal instance
-function get_relative_artifact($uri, $file_name, $module){
-    $source = drupal_get_path('module',$module).'/imports/public/'.substr($uri, 9);
+function get_relative_artifact($uri, $file_name, $module)
+{
+    $source = drupal_get_path('module', $module) . '/imports/public/' . substr($uri, 9);
 
     //handle file name versioning (_0_0...)
     $name_without_ext = substr($file_name, 0, strrpos($file_name, '.'));
-    if($file_name_end = strrpos($source, $name_without_ext)){
+    if ($file_name_end = strrpos($source, $name_without_ext)) {
         //aftifact file name is versioned. lets get the root path
-        $source = substr($source, 0, $file_name_end).$file_name;
+        $source = substr($source, 0, $file_name_end) . $file_name;
     }
 
     //clean double backslashes
-    str_replace('/','//',$source);
+    str_replace('/', '//', $source);
 
-    if(!file_exists($source)){
-        watchdog(WATCHDOG_NOTICE, 'Import '.$module.': Image does not exists at '.$source);
+    if (!file_exists($source)) {
+        watchdog(WATCHDOG_NOTICE, 'Import ' . $module . ': Image does not exists at ' . $source);
     }
     return $source;
 }
 
 //strips away versoning for uri
-function remove_uri_version($uri, $filename){
+function remove_uri_version($uri, $filename)
+{
     $name_without_ext = substr($filename, 0, strrpos($filename, '.'));
-    if($file_name_end = strrpos($uri, $name_without_ext)){
-        return substr($uri, 0, $file_name_end).$filename;
-    }else{
-        watchdog(WATCHDOG_NOTICE, 'File name '.$filename.' is not part of uri...see remove_uri_version()' );
+    if ($file_name_end = strrpos($uri, $name_without_ext)) {
+        return substr($uri, 0, $file_name_end) . $filename;
+    } else {
+        watchdog(WATCHDOG_NOTICE, 'File name ' . $filename . ' is not part of uri...see remove_uri_version()');
         return $uri;
     }
 }
 
 /********Menu********/
-function designssquare_lib_menu() {
+function designssquare_lib_menu()
+{
     $items['admin/designs-square'] = array(
         'title' => 'DesignsSquare.com',
         'description' => 'Menu system for DesignsSquare.com products.',
@@ -273,7 +304,8 @@ function designssquare_lib_menu() {
     return $items;
 }
 
-function register_ds_page() {
+function register_ds_page()
+{
     $build = array(
         'header_text' => array(
             '#type' => 'markup',
