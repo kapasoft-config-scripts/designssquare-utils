@@ -315,3 +315,24 @@ function register_ds_page()
     );
     return $build;
 }
+
+function _module_asset_dir($uri, $mod_name)
+{
+    $path_tokens = explode('/',$uri);
+    array_pop($path_tokens);
+    array_shift($path_tokens);
+    array_shift($path_tokens);//remove double forward slashes
+    $path_mod_relative = implode('/',$path_tokens);
+    return drupal_get_path('module', $mod_name) . '/assets/public' . '/' . $path_mod_relative;
+}
+
+function _module_asset_full_path($uri, $mod_name)
+{
+    return _module_asset_dir($uri, $mod_name).'/'._get_file_name($uri);
+}
+
+function _get_file_name($uri){
+    $path_tokens = explode('/',$uri);
+    $filename = array_pop($path_tokens);
+    return $filename;
+}
