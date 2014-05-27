@@ -424,3 +424,38 @@ function _contact_tapi(){
     $contact_tapi['hidden_input3'] = (isset($contact_form_array['form_token'])) ? render($contact_form_array['form_token']) : '';
     return $contact_tapi;
 }
+
+function _comment_tapi($comment){
+    $comment_tapi = array();
+    //comment author
+    $comment_tapi['author'] = array();
+    $author = (isset($comment->uid) && is_numeric($comment->uid)) ? user_load($comment->uid) : null;
+    $comment_tapi['author']['name'] = (isset($author->name)) ? $author->name : t('anonymous');
+    $comment_tapi['author']['gravatar_url'] = (isset($author->picture)) ? file_create_url($author->picture->uri) : '/sites/default/file/avatar.jpg';
+    $comment_tapi['author']['profile_url'] = (isset($author->uid)) ? '/user/'.$author->uid : '/';
+
+    //comment info
+    $comment_tapi['comment'] = array();
+    $comment_tapi['comment']['subject'] = $comment->subject;
+    $field_instance = field_get_items('comment', $comment, 'comment_body');
+    $field_value =($field_instance) ? field_view_value('comment', $comment, 'comment_body', $field_instance[0]) : '';
+    $comment_tapi['comment']['content'] = render($field_value);
+    $comment_tapi['comment']['date'] = (isset($comment->created)) ? date("F j, Y, g:i a", $comment->created) : 'July 25, 2111';
+
+    //comment links
+    if (user_access('administer comments') && user_access('post comments')) {
+    $comment_tapi['links'] = array();
+    $comment_tapi['links']['access'] = TRUE;
+    $comment_tapi['links']['edit_url'] = "comment/$comment->cid/edit";
+    $comment_tapi['links']['edit_text'] = t('Edit');
+    $comment_tapi['links']['reply_url'] = "comment/reply/$comment->nid/$comment->cid";
+    $comment_tapi['links']['reply_text'] = t('Reply');
+    $comment_tapi['links']['delete_url'] = "comment/$comment->cid/delete";
+    $comment_tapi['links']['delete_text'] = t('Delete');
+    }else{
+        //no access
+        $comment_tapi['links']['access'] = FALSE;
+    }
+
+    return $comment_tapi;
+}

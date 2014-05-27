@@ -180,6 +180,7 @@ function is_product_taxonomy()
     }
 }
 
+//returns appropriate template file. It first check it there is one in the theme scope, then it looks in the modules
 function get_template_path($module_name, $template_name)
 {
     $path_to_theme_templates = path_to_theme() . '/templates';
@@ -335,4 +336,28 @@ function _get_file_name($uri){
     $path_tokens = explode('/',$uri);
     $filename = array_pop($path_tokens);
     return $filename;
+}
+
+//for JQuery higher of 1.8 include legacy support to avoid errors such as 'msie' of undefined
+function include_jquery_legacy_support(&$javascript){
+    $migrate_js = '';
+    if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.08') > '1.07'){
+        //use jquery_updates ui libraries instead the drupal core
+        foreach($javascript as $key => $js_path){
+            $token_path = explode("/", $key);
+            $current_js_lib = $token_path[count($token_path) - 1];
+
+            //add legacy support for other modules still using jQuery legacy library
+            if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
+                $new_path = 'http://code.jquery.com/jquery-migrate-1.2.1.min.js';
+                $migrate_js = $js_path;
+                $migrate_js['version'] = "1.2.1";
+                $migrate_js['data'] = $new_path;
+                $migrate_js['weight'] = $js_path['weight'] + 0.01;
+                $migrate_js['type'] = 'external';
+                $javascript[$new_path] = $migrate_js;
+            }
+        }
+    }
+
 }
