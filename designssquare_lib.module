@@ -87,7 +87,7 @@ function include_blocks(&$vars)
         if (block_get_blocks_by_region($region_key)) {
             $blocks = block_get_blocks_by_region($region_key);
         }
-        if (!empty($ctx_plugin)) {
+        if (!empty($ctx_plugin) && ($region_key !== 'content')) {
             $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
         }
 
