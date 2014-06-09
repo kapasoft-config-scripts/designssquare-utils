@@ -76,48 +76,49 @@ function get_referencing_product_display_id($product)
 }
 
 //includes blocks in current scope(i.e html, node,etc) and places them in $region['block_id'] variable
-function include_blocks(&$vars)
+function include_blocks(&$vars, $scope = 'page')
 {
     $all_blocks = array();
-    //making blocks available
+    $ctx_blocks = array();
+    $blocks = array();
     //retrieve context plugin as alternative for managing blocks
     $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
+
     foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
-//        drupal_static_reset('block_list');
+
         if (block_get_blocks_by_region($region_key)) {
             $blocks = block_get_blocks_by_region($region_key);
         }
+
         if (!empty($ctx_plugin) && ($region_key !== 'content')) {
-            $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
-        }
-
-        if (isset($ctx_blocks) && isset($blocks)) {
-            //there are blocks from the context and from blocks module
-            $all_blocks = array_merge($blocks, $ctx_blocks);
-
-            //sort the blocks merged
-            $all_blocks['#sorted'] = FALSE;
-
-            //maintain weights
-            foreach ($all_blocks as &$block) {
-                if (isset($block['#block']->weight)) {
-                    $block['#weight'] = $block['#block']->weight;
-                }
+            if ($scope == 'html') {
+                //blocks not build in html scope, so we build it manually
+                $region_blocks = $ctx_plugin->block_list($region_key);
+                $ctx_blocks = _block_get_renderable_array(_block_render_blocks($region_blocks));
+            } else {
+                $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
             }
-
-        } elseif (isset($ctx_blocks)) {
-            //there are blocks ONLY from context module
-            $all_blocks = $ctx_blocks;
-        } elseif (isset($blocks)) {
-            //there are blocks ONLY from block module
-            $all_blocks = $blocks;
         }
 
-        // Get the content for each region and add it to the $region variable
+        $all_blocks = array_merge($blocks, $ctx_blocks);
+
+        //sort the blocks merged
+        $all_blocks['#sorted'] = FALSE;
+
+        //maintain weights
+        foreach ($all_blocks as &$block) {
+            if (isset($block['#block']->weight)) {
+                $block['#weight'] = $block['#block']->weight;
+            }
+        }
+
+        // add it to the $region variable
         $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
-        unset($all_blocks);
-        unset($blocks);
-        unset($ctx_blocks);
+
+        //reset arrays
+        $all_blocks = array();
+        $blocks = array();
+        $ctx_blocks = array();
     }
 }
 
@@ -319,36 +320,38 @@ function register_ds_page()
 
 function _module_asset_dir($uri, $mod_name)
 {
-    $path_tokens = explode('/',$uri);
+    $path_tokens = explode('/', $uri);
     array_pop($path_tokens);
     array_shift($path_tokens);
-    array_shift($path_tokens);//remove double forward slashes
-    $path_mod_relative = implode('/',$path_tokens);
+    array_shift($path_tokens); //remove double forward slashes
+    $path_mod_relative = implode('/', $path_tokens);
     return drupal_get_path('module', $mod_name) . '/assets/public' . '/' . $path_mod_relative;
 }
 
 function _module_asset_full_path($uri, $mod_name)
 {
-    return _module_asset_dir($uri, $mod_name).'/'._get_file_name($uri);
+    return _module_asset_dir($uri, $mod_name) . '/' . _get_file_name($uri);
 }
 
-function _get_file_name($uri){
-    $path_tokens = explode('/',$uri);
+function _get_file_name($uri)
+{
+    $path_tokens = explode('/', $uri);
     $filename = array_pop($path_tokens);
     return $filename;
 }
 
 //for JQuery higher of 1.8 include legacy support to avoid errors such as 'msie' of undefined
-function include_jquery_legacy_support(&$javascript){
+function include_jquery_legacy_support(&$javascript)
+{
     $migrate_js = '';
-    if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.08') > '1.07'){
+    if ($jQuery_ver = variable_get('jquery_update_jquery_version', '1.08') > '1.07') {
         //use jquery_updates ui libraries instead the drupal core
-        foreach($javascript as $key => $js_path){
+        foreach ($javascript as $key => $js_path) {
             $token_path = explode("/", $key);
             $current_js_lib = $token_path[count($token_path) - 1];
 
             //add legacy support for other modules still using jQuery legacy library
-            if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
+            if ($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js') {
                 $new_path = 'http://code.jquery.com/jquery-migrate-1.2.1.min.js';
                 $migrate_js = $js_path;
                 $migrate_js['version'] = "1.2.1";
