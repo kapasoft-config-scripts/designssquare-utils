@@ -364,3 +364,86 @@ function include_jquery_legacy_support(&$javascript)
     }
 
 }
+
+//find next node by id with the same content type
+function next_node($node){
+    //Build query
+    $query = new EntityFieldQuery();
+
+   //Only show of specific content type
+    $query->entityCondition('bundle', $node->type);
+    $query->entityCondition('entity_type', 'node');
+
+    //only show with IDs larger than one
+    $query->propertyCondition('nid', $node->nid, '>', 'nid');
+    $query->propertyCondition('status', 1);
+    $query->propertyOrderBy('nid');
+
+    //Excecute query
+    $result = $query->execute();
+
+    $next_project = (isset($result['node'])) ? array_shift($result['node']) : null;
+    return (isset($next_project) && isset($next_project->nid)) ? $next_project->nid : null;
+}
+
+//find previous node by id with the same content type
+function previous_node($node){
+    //Build query
+    $query = new EntityFieldQuery();
+
+    //Only show of specific content type
+    $query->entityCondition('bundle', $node->type);
+    $query->entityCondition('entity_type', 'node');
+
+    //only show with IDs larger than one
+    $query->propertyCondition('nid', $node->nid, '<', 'nid');
+    $query->propertyCondition('status', 1);
+    $query->propertyOrderBy('nid');
+
+    //Excecute query
+    $result = $query->execute();
+    $previous_node = (isset($result['node'])) ? array_pop($result['node']) : null;
+    return (isset($previous_node) && isset($previous_node->nid)) ? $previous_node->nid : null;
+}
+
+
+/*********CONTEXTUAL LINKS************/
+//generates contextual link for the node
+function node_contextual_links($node){
+    $contextual_links = contextual_element_info();
+    $contextual_links['contextual_links']['#contextual_links'] = array(
+        'node' => array('node', array((isset($node->nid)) ? $node->nid : '')),
+    );
+
+    return $contextual_links['contextual_links'];
+}
+
+//generates contextual links for the view
+function view_contextual_links($view){
+    //provide contextual links
+    $contextual_links = contextual_element_info();
+    $contextual_links['contextual_links']['#contextual_links'] = array(
+        'views' => array('admin/structure/views/view/'.$view->name, array($view->current_display)),
+    );
+
+    return $contextual_links['contextual_links'];
+}
+
+/**********Slider*************/
+//includes teh FlexSlider JS/CSS Libs and initiates slider with id provided as parameter
+function import_flex_slider(&$vars, $num_items_slide, $slider_id = 'flexslider'){
+    $slider_tapi = array();
+    $slider_tapi["num_slides"] = $num_items_slide + 1;
+    $slider_tapi['slider_id'] = $slider_id;
+    $vars['slider_tapi'] = $slider_tapi;
+
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 1,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/FlexSlider/custom.css', array('group' => CSS_THEME + 2,'type' => 'file'));
+    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
+    $inline_js = 'jQuery.noConflict()(function ($) {' . "\n";
+    $inline_js .= '$(window).load(function() {' . "\n";
+    $inline_js .= '    $(\'.'.$slider_id.'\').flexslider({animation: "slide", slideshow: false, controlNav: false, video: true});' . "\n";
+    $inline_js .= '});' . "\n";
+    $inline_js .= '});' . "\n";
+    drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 5));
+}
