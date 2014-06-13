@@ -438,7 +438,7 @@ function import_flex_slider(&$vars, $num_items_slide, $slider_id = 'flexslider')
     $vars['slider_tapi'] = $slider_tapi;
 
     drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 1,'type' => 'file'));
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/FlexSlider/custom.css', array('group' => CSS_THEME + 2,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/FlexSlider/custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     $inline_js = 'jQuery.noConflict()(function ($) {' . "\n";
     $inline_js .= '$(window).load(function() {' . "\n";
