@@ -447,3 +447,56 @@ function import_flex_slider(&$vars, $num_items_slide, $slider_id = 'flexslider')
     $inline_js .= '});' . "\n";
     drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 5));
 }
+
+//Transfer assets
+function export_asset($asset, $mod_name)
+{
+    $dest_dir = _module_asset_dir($asset['uri'], $mod_name);
+    $dest_full_path = _module_asset_full_path($asset['uri'], $mod_name);
+    if (!file_exists($dest_full_path)) {
+        file_prepare_directory($dest_dir, FILE_CREATE_DIRECTORY);
+        file_unmanaged_copy($asset['uri'], $dest_full_path, FILE_EXISTS_REPLACE);
+    }
+}
+
+//transfers file and adds entry in database if not already present
+function transfer_asset($asset, $mod_name, $type)
+{
+    $source = _module_asset_full_path($asset['uri'], $mod_name);
+    $uri = $asset['uri'];
+
+    if (!file_exists($source)) {
+        watchdog('designssquare_lib_feature_assets', 'file ' . $source . ' to be imported does not exist in ');
+    }
+
+    if (!file_exists($uri)) {
+        //ensure dir is present
+        $directory = drupal_dirname($uri);
+        file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+        file_unmanaged_copy($source, $uri);
+    }
+
+    /*****Save File*****/
+    $fid_file = db_select('file_managed', 'n')
+        ->fields('n', array('fid', 'uri'))
+        ->condition('n.uri', $uri)
+        ->execute()
+        ->fetchCol();
+    if (empty($fid_file)) {
+        //no asset with the 'uri' is present
+        unset($asset['fid']);
+        unset($asset['timestamp']);
+        $file_to_save = (object)$asset;
+        // Change status to permanent.
+        $file_to_save->status = FILE_STATUS_PERMANENT;
+        $file_to_save->uri = $uri;
+
+        $final_file = file_save($file_to_save);
+        //all permanent files needs an entry in the 'file_usage' table
+        file_usage_add($final_file, $mod_name, $type, 1);
+        return $final_file->fid;
+    } else {
+        //file already exist in database
+        return $fid_file[0];
+    }
+}
