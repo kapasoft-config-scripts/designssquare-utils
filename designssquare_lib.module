@@ -222,10 +222,7 @@ function move_blocks_for_sidebars(&$context, $term_id_of_sidebar)
 function get_node_from_cache()
 {
     //get the current content from cache
-    $content = drupal_set_page_content();
-    //indicate that you are not adding content but just reading it by setting static variable 'system...added' to False
-    $system_main_content_added = & drupal_static('system_main_content_added');
-    $system_main_content_added = FALSE;
+    $content = get_content_from_cache();
 
     //retrieve current node being loaded
 //    $current_node = array_slice($content['system_main']['nodes'],0,1);
@@ -242,6 +239,15 @@ function get_node_from_cache()
     }
 
     return $current_node;
+}
+
+function get_content_from_cache(){
+    //get the current content from cache
+    $content = drupal_set_page_content();
+    //indicate that you are not adding content but just reading it by setting static variable 'system...added' to False
+    $system_main_content_added = & drupal_static('system_main_content_added');
+    $system_main_content_added = FALSE;
+    return $content;
 }
 
 //adding templates to the themes scope. It is assumed that all template files are stored in folder named "templates"

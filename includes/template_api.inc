@@ -1,5 +1,88 @@
 <?php
 
+/******GALLERY*******/
+function _gallery_teaser_tapi($project)
+{
+    module_load_include('module', 'designssquare_lib');
+    $gallery_tapi = array();
+
+    if(isset($project)) {
+        $gallery_tapi['url'] = base_path().drupal_get_path_alias('node/' . $project->nid); //url to a project
+        $gallery_tapi['title'] = $project->title;
+        $field_instance = field_get_items('node', $project, 'field_ds_gallery_summary');
+        $field_value = ($field_instance) ? field_view_value('node', $project, 'field_ds_gallery_summary', $field_instance[0]) : '';
+        $gallery_tapi['summary'] = htmlspecialchars_decode(render($field_value));
+        $field_instance = field_get_items('node', $project, 'field_ds_gallery_featured_img');
+        $field_value = ($field_instance) ? array_shift($field_instance) : '';
+        $gallery_tapi['featured_img'] = array();
+        $gallery_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
+        $gallery_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+    }else{
+        $gallery_tapi['url'] = ''; //url to a project
+        $gallery_tapi['title'] = '';
+        $gallery_tapi['summary'] = '';
+        $gallery_tapi['featured_img'] = array();
+        $gallery_tapi['featured_img']['url'] = '';
+        $gallery_tapi['featured_img']['alt'] = '';
+    }
+
+    //provide contextual links
+    $gallery_tapi['ds_contextual_links'] = node_contextual_links($project);
+
+    return $gallery_tapi;
+}
+
+function _gallery_tapi($node)
+{
+    $gallery_tapi = _gallery_teaser_tapi($node);
+
+    if (isset($node) && !empty($node)) {
+        $field_instance = field_get_items('node', $node, 'body');
+        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
+        $gallery_tapi['content'] = render($content);
+        $gallery_tapi['index'] = array();
+        $gallery_tapi['index']['next'] = array();
+        $id_next_node = next_node($node);
+        if (isset($id_next_node)) {
+            $gallery_tapi['index']['next']['is_present'] = TRUE;
+            $gallery_tapi['index']['next']['url'] = base_path() . drupal_get_path_alias('node/' . $id_next_node);
+            $gallery_tapi['index']['next']['text'] = t('Next');
+        } else {
+            $gallery_tapi['index']['next']['is_present'] = FALSE;
+        }
+
+        $id_previous_node = previous_node($node);
+        $gallery_tapi['index']['previous'] = array();
+        if (isset($id_previous_node)) {
+            $gallery_tapi['index']['previous']['is_present'] = TRUE;
+            $gallery_tapi['index']['previous']['text'] = t('Previous');
+            $gallery_tapi['index']['previous']['url'] = base_path() . drupal_get_path_alias('node/' . $id_previous_node);
+        } else {
+            $gallery_tapi['index']['previous']['is_present'] = FALSE;
+        }
+
+        $gallery_tapi['gallery_img'] = array();
+        $field_instance = field_get_items('node', $node, 'field_ds_gallery_images');
+        foreach ($field_instance as $key => $gallery_img) {
+            $gallery_tapi['gallery_img'][$key]['url'] = (isset($gallery_img['uri'])) ? file_create_url($gallery_img['uri']) : '';
+            $gallery_tapi['gallery_img'][$key]['alt'] = (isset($gallery_img['alt'])) ? $gallery_img['alt'] : '';
+        }
+    } else {
+        $gallery_tapi['content'] = '';
+        $gallery_tapi['index'] = array();
+        $gallery_tapi['index']['next'] = array();
+        $gallery_tapi['index']['next']['url'] = '';
+        $gallery_tapi['index']['next']['text'] = '';
+        $gallery_tapi['index']['previous'] = array();
+        $gallery_tapi['index']['previous']['text'] = '';
+        $gallery_tapi['index']['previous']['url'] = '';
+        $gallery_tapi['gallery_img'] = array();
+    }
+
+    return $gallery_tapi;
+}
+
+/*****PORTFOLIO*******/
 function _project_teaser_tapi($project)
 {
     module_load_include('module', 'designssquare_lib');
