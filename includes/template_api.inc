@@ -1,5 +1,67 @@
 <?php
 
+/*******Newsletter******/
+function _newsletter_teaser_tapi($newsletter)
+{
+    module_load_include('module', 'designssquare_lib');
+    $newsletter_tapi = array();
+
+    if(isset($newsletter)) {
+        $newsletter_tapi['url'] = base_path().drupal_get_path_alias('node/' . $newsletter->nid); //url to a project
+        $newsletter_tapi['title'] = $newsletter->title;
+        $field_instance = field_get_items('node', $newsletter, 'field_ds_newsletter_summary');
+        $field_value = ($field_instance) ? field_view_value('node', $newsletter, 'field_ds_newsletter_summary', $field_instance[0]) : '';
+        $newsletter_tapi['summary'] = htmlspecialchars_decode(render($field_value));
+
+        $field_instance = field_get_items('node', $newsletter, 'field_ds_newsletter_download');
+        $field_value = ($field_instance) ? array_shift($field_instance) : '';
+        $newsletter_tapi['download'] = array();
+        $newsletter_tapi['download']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
+        $newsletter_tapi['download']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+        $newsletter_tapi['download']['text'] = 'To Read More';
+    }else{
+        $newsletter_tapi['url'] = ''; //url to a project
+        $newsletter_tapi['title'] = '';
+        $newsletter_tapi['summary'] = '';
+        $newsletter_tapi['download'] = array();
+        $newsletter_tapi['download']['url'] = '';
+        $newsletter_tapi['download']['alt'] = '';
+    }
+
+    //provide contextual links
+    $newsletter_tapi['ds_contextual_links'] = node_contextual_links($newsletter);
+
+    return $newsletter_tapi;
+}
+
+function _newsletter_tapi($node)
+{
+    $newsletter_tapi = _newsletter_teaser_tapi($node);
+
+    if (isset($node) && !empty($node)) {
+        $field_instance = field_get_items('node', $node, 'body');
+        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
+        $newsletter_tapi['content'] = render($content);
+        $field_instance = field_get_items('node', $node, 'field_ds_newsletter_pub_date');
+        $publication_timestamp = ($field_instance) ? $field_instance[0]['value'] : null;
+        $newsletter_tapi['date'] = array();
+        $newsletter_tapi['date']['full'] = (isset($publication_timestamp)) ? date("j M, Y", $publication_timestamp) : '';
+        $newsletter_tapi['date']['day'] = (isset($publication_timestamp)) ? date("j", $publication_timestamp) : '';
+        $newsletter_tapi['date']['month'] = (isset($publication_timestamp)) ? date("M", $publication_timestamp) : '';
+        $newsletter_tapi['date']['year'] = (isset($publication_timestamp)) ? date("Y", $publication_timestamp) : '';
+    } else {
+        $newsletter_tapi['content'] = '';
+        $newsletter_tapi['date'] = array();
+        $newsletter_tapi['date']['full'] = '';
+        $newsletter_tapi['date']['day'] = '';
+        $newsletter_tapi['date']['month'] = '';
+        $newsletter_tapi['date']['year'] = '';
+    }
+
+    return $newsletter_tapi;
+}
+
+
 /******GALLERY*******/
 function _gallery_teaser_tapi($project)
 {
