@@ -1,5 +1,89 @@
 <?php
 
+/*******Podcast******/
+function _podcast_teaser_tapi($podcast)
+{
+    module_load_include('module', 'designssquare_lib');
+    $podcast_tapi = array();
+
+    if(isset($podcast)) {
+        $podcast_tapi['url'] = base_path().drupal_get_path_alias('node/' . $podcast->nid); //url to a project
+        $podcast_tapi['title'] = $podcast->title;
+        $field_instance = field_get_items('node', $podcast, 'field_ds_podcast_summary');
+        $field_value = ($field_instance) ? field_view_value('node', $podcast, 'field_ds_podcast_summary', $field_instance[0]) : '';
+        $podcast_tapi['summary'] = htmlspecialchars_decode(render($field_value));
+
+        $field_instance = field_get_items('node', $podcast, 'field_ds_podcast_featured_img');
+        $field_value = ($field_instance) ? array_shift($field_instance) : '';
+        $podcast_tapi['featured_img'] = array();
+        $podcast_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
+        $podcast_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+
+        $field_instance = field_get_items('node', $podcast, 'field_ds_podcast_download');
+        $field_value = ($field_instance) ? array_shift($field_instance) : '';
+        $podcast_tapi['audio'] = array();
+        $podcast_tapi['audio']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
+        $podcast_tapi['audio']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+        $podcast_tapi['audio']['label'] = t('Play Podcast');
+        $audio_render_array = field_view_field(
+            'node',
+            $podcast,
+            'field_ds_podcast_download',
+            array(
+                'type' => 'audiofield_embedded',
+                'label' => 'hidden',
+                'field types' => array('file'),
+                'description' => t('Displays an audio player and optional download link.'),
+            )
+        );
+        $podcast_tapi['audio']['full'] = render($audio_render_array);
+    }else{
+        $podcast_tapi['url'] = ''; //url to a project
+        $podcast_tapi['title'] = '';
+        $podcast_tapi['summary'] = '';
+        $podcast_tapi['audio'] = array();
+        $podcast_tapi['audio']['url'] = '';
+        $podcast_tapi['audio']['alt'] = '';
+        $podcast_tapi['audio']['label'] = '';
+        $podcast_tapi['audio']['full'] = '';
+        $podcast_tapi['featured_img'] = array();
+        $podcast_tapi['featured_img']['url'] = '';
+        $podcast_tapi['featured_img']['alt'] = '';
+    }
+
+    //provide contextual links
+    $podcast_tapi['ds_contextual_links'] = node_contextual_links($podcast);
+
+    return $podcast_tapi;
+}
+
+function _podcast_tapi($node)
+{
+    $podcast_tapi = _podcast_teaser_tapi($node);
+
+    if (isset($node) && !empty($node)) {
+        $field_instance = field_get_items('node', $node, 'body');
+        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
+        $podcast_tapi['content'] = render($content);
+        $field_instance = field_get_items('node', $node, 'field_ds_podcast_pub_date');
+        $publication_timestamp = ($field_instance) ? $field_instance[0]['value'] : null;
+        $podcast_tapi['date'] = array();
+        $podcast_tapi['date']['full'] = (isset($publication_timestamp)) ? date("j M, Y", $publication_timestamp) : '';
+        $podcast_tapi['date']['day'] = (isset($publication_timestamp)) ? date("j", $publication_timestamp) : '';
+        $podcast_tapi['date']['month'] = (isset($publication_timestamp)) ? date("M", $publication_timestamp) : '';
+        $podcast_tapi['date']['year'] = (isset($publication_timestamp)) ? date("Y", $publication_timestamp) : '';
+    } else {
+        $podcast_tapi['content'] = '';
+        $podcast_tapi['date'] = array();
+        $podcast_tapi['date']['full'] = '';
+        $podcast_tapi['date']['day'] = '';
+        $podcast_tapi['date']['month'] = '';
+        $podcast_tapi['date']['year'] = '';
+    }
+
+    return $podcast_tapi;
+}
+
 /*******Newsletter******/
 function _newsletter_teaser_tapi($newsletter)
 {
