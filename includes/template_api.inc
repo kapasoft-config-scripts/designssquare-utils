@@ -226,6 +226,18 @@ function _gallery_tapi($node)
 {
     $gallery_tapi = _gallery_teaser_tapi($node);
 
+    //resize image at focus
+    $gallery_tapi['gallery_focus_img'] = array();
+    $image_style = image_style_load('ds_foto_gallery_single');
+    if(empty($image_style)){
+        $gallery_tapi['gallery_focus_img']['width'] = '';
+        $gallery_tapi['gallery_focus_img']['height'] = '';
+    }else{
+        $thumb_effect = array_shift($image_style['effects']);
+        $gallery_tapi['gallery_focus_img']['width'] = $thumb_effect['data']['width'];
+        $gallery_tapi['gallery_focus_img']['height'] = $thumb_effect['data']['height'];
+    }
+
     if (isset($node) && !empty($node)) {
         $field_instance = field_get_items('node', $node, 'body');
         $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
