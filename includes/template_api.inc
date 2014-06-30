@@ -1,5 +1,40 @@
 <?php
 
+/******Event********/
+function _event_teaser_tapi($event){
+    $event_tapi = array();
+    if(isset($event)){
+        $event_tapi['url'] = base_path().drupal_get_path_alias('node/' . $event->nid); //url to a event
+        $event_tapi['title'] = $event->title;
+        $field_instance = field_get_items('node', $event, 'field_event_date');
+//        $test_value = field_view_value('node', $event, 'field_event_date', $field_instance[0]);
+//        $test_format = format_date($field_instance[0]['value']);
+        $event_date = strtotime($field_instance[0]['value']);
+//        $new_date = date('d-m-Y', $date);
+
+//        $test_format = format_date($date, 'short', 'D, d M Y', $field_instance[0]['timezone']);
+//        $event_date = ($field_instance) ? $field_instance[0]['value'] : null;
+        $event_tapi['date'] = array();
+        $event_tapi['date']['full'] = (isset($event_date)) ? date("j M, Y", $event_date) : '';
+        $event_tapi['date']['day'] = (isset($event_date)) ? date("j", $event_date) : '';
+        $event_tapi['date']['month'] = (isset($event_date)) ? date("M", $event_date) : '';
+        $event_tapi['date']['year'] = (isset($event_date)) ? date("Y", $event_date) : '';
+        $event_tapi['date']['hour'] = (isset($event_date)) ? date("H", $event_date) : '';
+        $event_tapi['date']['min'] = (isset($event_date)) ? date("i", $event_date) : '';
+    }else{
+        $event_tapi['url'] = '';
+        $event_tapi['title'] = '';
+        $event_tapi['date'] = array();
+        $event_tapi['date']['full'] = '';
+        $event_tapi['date']['day'] =  '';
+        $event_tapi['date']['month'] = '';
+        $event_tapi['date']['year'] = '';
+        $event_tapi['date']['hour'] = '';
+    }
+
+    return $event_tapi;
+}
+
 /*******Podcast******/
 function _podcast_teaser_tapi($podcast)
 {
@@ -163,6 +198,15 @@ function _gallery_teaser_tapi($project)
         $gallery_tapi['featured_img'] = array();
         $gallery_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
         $gallery_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+        $image_style = image_style_load('ds_foto_gallery_teaser');
+        if(empty($image_style)){
+            $gallery_tapi['featured_img']['width'] = '';
+            $gallery_tapi['featured_img']['height'] = '';
+        }else{
+            $thumb_effect = array_shift($image_style['effects']);
+            $gallery_tapi['featured_img']['width'] = $thumb_effect['data']['width'];
+            $gallery_tapi['featured_img']['height'] = $thumb_effect['data']['height'];
+        }
     }else{
         $gallery_tapi['url'] = ''; //url to a project
         $gallery_tapi['title'] = '';
@@ -726,17 +770,27 @@ function _contact_tapi()
 
     //name input field
     $contact_tapi['name_name'] = $contact_form_array['name']['#name'];
+    $contact_tapi['name_label'] = t('Your Name:');
+    $contact_tapi['name_type'] = 'type';
     //subject input field
     $contact_tapi['subject_name'] = $contact_form_array['subject']['#name'];
     $contact_tapi['subject_value'] = 'From ' . $_SERVER['HTTP_HOST'];
+    $contact_tapi['subject_label'] = t('Subject:');
+    $contact_tapi['subject_type'] = 'text';
+
     //email input field
     $contact_tapi['email_name'] = $contact_form_array['mail']['#name'];
+    $contact_tapi['email_label'] = t('Your Email:');
+    $contact_tapi['email_type'] = 'email';
+
     //message input field
     $contact_tapi['message_name'] = $contact_form_array['message']['#name'];
+    $contact_tapi['message_label'] = t('Your Message');
 
     //submit input field
     $contact_tapi['submit_name'] = 'op';
     $contact_tapi['submit_id'] = 'edit-submit';
+    $contact_tapi['submit_label'] = t('Send');
 
     //category_field
 //    $contact_tapi['category'] = render($contact_form_array['cid']);
@@ -745,6 +799,9 @@ function _contact_tapi()
     $contact_tapi['hidden_input'] = render($contact_form_array['form_build_id']);
     $contact_tapi['hidden_input2'] = render($contact_form_array['form_id']);
     $contact_tapi['hidden_input3'] = (isset($contact_form_array['form_token'])) ? render($contact_form_array['form_token']) : '';
+
+    //
+    drupal_alter('contact_tapi',$contact_tapi);
     return $contact_tapi;
 }
 

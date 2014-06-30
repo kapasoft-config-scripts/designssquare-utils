@@ -184,14 +184,25 @@ function is_product_taxonomy()
 //returns appropriate template file. It first check it there is one in the theme scope, then it looks in the modules
 function get_template_path($module_name, $template_name)
 {
+    $path_to_template = '';
     $path_to_theme_templates = path_to_theme() . '/templates';
     $path_to_widget_templates = drupal_get_path('module', $module_name) . '/templates';
 
     if (file_exists($path_to_theme_templates . '/' . $template_name . '.tpl.php')) {
-        return $path_to_theme_templates;
+        $path_to_template = $path_to_theme_templates;
     } else {
-        return $path_to_widget_templates;
+        $path_to_template = $path_to_widget_templates;
     }
+
+
+    //substract the template file without relative path
+    $path_tokens = explode("/", $template_name);
+    $template_file_name = array_pop($path_tokens);
+    $hook_template_name = preg_replace('/-/','_', $template_file_name);
+    //hook to let others modify template
+    drupal_alter($hook_template_name, $path_to_template);
+
+    return $path_to_template;
 }
 
 //moves blocks from one sidebar to another depending on the taxonomy specified to left, right or none
@@ -443,7 +454,7 @@ function import_flex_slider(&$vars, $num_items_slide, $slider_id = 'flexslider')
     $slider_tapi['slider_id'] = $slider_id;
     $vars['slider_tapi'] = $slider_tapi;
 
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 1,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 3,'type' => 'file'));
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/FlexSlider/flex-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     $inline_js = 'jQuery.noConflict()(function ($) {' . "\n";
