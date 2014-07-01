@@ -198,6 +198,7 @@ function _gallery_teaser_tapi($project)
         $gallery_tapi['featured_img'] = array();
         $gallery_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
         $gallery_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+        //images size for the teaser
         $image_style = image_style_load('ds_foto_gallery_teaser');
         if(empty($image_style)){
             $gallery_tapi['featured_img']['width'] = '';
@@ -207,6 +208,19 @@ function _gallery_teaser_tapi($project)
             $gallery_tapi['featured_img']['width'] = $thumb_effect['data']['width'];
             $gallery_tapi['featured_img']['height'] = $thumb_effect['data']['height'];
         }
+
+        //images size for the block
+        $gallery_tapi['block_img'] = array();
+        $image_style = image_style_load('ds_foto_gallery_block');
+        if(empty($image_style)){
+            $gallery_tapi['block_img']['width'] = '';
+            $gallery_tapi['block_img']['height'] = '';
+        }else{
+            $thumb_effect = array_shift($image_style['effects']);
+            $gallery_tapi['block_img']['width'] = $thumb_effect['data']['width'];
+            $gallery_tapi['block_img']['height'] = $thumb_effect['data']['height'];
+        }
+
     }else{
         $gallery_tapi['url'] = ''; //url to a project
         $gallery_tapi['title'] = '';
