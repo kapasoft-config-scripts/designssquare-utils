@@ -7,13 +7,7 @@ function _event_teaser_tapi($event){
         $event_tapi['url'] = base_path().drupal_get_path_alias('node/' . $event->nid); //url to a event
         $event_tapi['title'] = $event->title;
         $field_instance = field_get_items('node', $event, 'field_event_date');
-//        $test_value = field_view_value('node', $event, 'field_event_date', $field_instance[0]);
-//        $test_format = format_date($field_instance[0]['value']);
         $event_date = strtotime($field_instance[0]['value']);
-//        $new_date = date('d-m-Y', $date);
-
-//        $test_format = format_date($date, 'short', 'D, d M Y', $field_instance[0]['timezone']);
-//        $event_date = ($field_instance) ? $field_instance[0]['value'] : null;
         $event_tapi['date'] = array();
         $event_tapi['date']['full'] = (isset($event_date)) ? date("j M, Y", $event_date) : '';
         $event_tapi['date']['day'] = (isset($event_date)) ? date("j", $event_date) : '';
@@ -160,7 +154,7 @@ function _newsletter_teaser_tapi($newsletter)
         $newsletter_tapi['download'] = array();
         $newsletter_tapi['download']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
         $newsletter_tapi['download']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
-        $newsletter_tapi['download']['text'] = 'To Read More';
+        $newsletter_tapi['download']['text'] = t('To Read More');
     }else{
         $newsletter_tapi['url'] = ''; //url to a project
         $newsletter_tapi['title'] = '';
@@ -173,6 +167,7 @@ function _newsletter_teaser_tapi($newsletter)
     //provide contextual links
     $newsletter_tapi['ds_contextual_links'] = node_contextual_links($newsletter);
 
+    drupal_alter('newsletter_teaser_tapi', $newsletter_tapi);
     return $newsletter_tapi;
 }
 

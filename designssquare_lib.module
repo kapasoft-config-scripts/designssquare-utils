@@ -517,3 +517,24 @@ function transfer_asset($asset, $mod_name, $type)
         return $fid_file[0];
     }
 }
+
+/*creates hook for other modules to pass in variables
+ *
+ *@param: id of the block
+ *
+ *@return: array of altered content
+*/
+function get_block_context($block_id){
+    $context = array();
+
+    //defaults
+    $context['classes'] = '';//final list of classes
+    $context['classes_array'] = array();//array of each class before combined into one string
+    $context['classes_array'][] = 'contextual-links-region';
+
+    drupal_alter('ds_block_context', $context, $block_id);
+
+    //preprocess
+    $context['classes'] = implode(' ', $context['classes_array'] );
+    return $context;
+}
