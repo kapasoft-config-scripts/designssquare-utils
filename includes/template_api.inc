@@ -54,6 +54,17 @@ function _podcast_teaser_tapi($podcast)
         $podcast_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
         $podcast_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
 
+        //images size for the teaser
+        $image_style = image_style_load('ds_podcast_teaser_img');
+        if(empty($image_style)){
+            $podcast_tapi['featured_img']['width'] = '';
+            $podcast_tapi['featured_img']['height'] = '';
+        }else{
+            $thumb_effect = array_shift($image_style['effects']);
+            $podcast_tapi['featured_img']['width'] = $thumb_effect['data']['width'];
+            $podcast_tapi['featured_img']['height'] = $thumb_effect['data']['height'];
+        }
+
         $field_instance = field_get_items('node', $podcast, 'field_ds_podcast_download');
         $field_value = ($field_instance) ? array_shift($field_instance) : '';
         $podcast_tapi['audio'] = array();
@@ -114,6 +125,18 @@ function _podcast_tapi($node)
         $podcast_tapi['date']['day'] = '';
         $podcast_tapi['date']['month'] = '';
         $podcast_tapi['date']['year'] = '';
+    }
+
+    //images size for the block
+    $podcast_tapi['block_img'] = array();
+    $image_style = image_style_load('ds_podcast_block_img');
+    if(empty($image_style)){
+        $podcast_tapi['block_img']['width'] = '';
+        $podcast_tapi['block_img']['height'] = '';
+    }else{
+        $thumb_effect = array_shift($image_style['effects']);
+        $podcast_tapi['block_img']['width'] = $thumb_effect['data']['width'];
+        $podcast_tapi['block_img']['height'] = $thumb_effect['data']['height'];
     }
 
     return $podcast_tapi;
