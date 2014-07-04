@@ -538,3 +538,26 @@ function get_block_context($block_id){
     $context['classes'] = implode(' ', $context['classes_array'] );
     return $context;
 }
+
+/**
+ * retrieves list of functions with hook provided
+ *
+ * @param $hook
+ *   hook name (i.e. preprocess_page, preprocess_block)
+
+ * @return
+ *   list of hook functions in format of module_hook
+ */
+function module_preprocessors($hook){
+    $preprocessors = array();
+
+    //retrieve all modules with the hook - preprocess_page
+    $modules = module_list();
+    foreach($modules as $module){
+        if (module_hook($module, 'preprocess_page')) {
+            $preprocessors[] = $module.'_preprocess_page';
+        }
+    }
+
+    return $preprocessors;
+}
