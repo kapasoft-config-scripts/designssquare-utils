@@ -1,7 +1,26 @@
 <?php
+/*********Functionality********/
+function designssquare_lib_js_alter(&$javascript) {
+    if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.8') === '1.10'){
+        //use jquery_updates ui libraries instead the drupal core
+        foreach($javascript as $key => $js_path){
+            $token_path = explode("/", $key);
+            $current_js_lib = $token_path[count($token_path) - 1];
 
-//to include artifacts from theme scope
-//i.e._theme_include('bazar','/includes/template_api.inc');
+            //add legacy support for other modules still using Jquery legacy library
+            if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
+                $new_path = drupal_get_path('module', 'designssquare_lib').'/js/jquery/jquery-migrate.min.js';
+                $data = $js_path;
+                $data['version'] = "1.2.1";
+                $data['data'] = $new_path;
+                $data['weight'] = $js_path['weight'] + 0.01;
+                $javascript[$new_path] = $data;
+            }
+        }
+    }
+}
+
+/**********API***********/
 function theme_include($theme, $path)
 {
     static $themes = array();
