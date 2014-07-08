@@ -580,3 +580,9 @@ function module_preprocessors($hook){
 
     return $preprocessors;
 }
+
+
+function designssquare_lib_init(){
+    //load for processing file_managed on Ajax calls(i.e. upload, remove)
+    module_load_include('inc', 'designssquare_lib', 'inc/file_managed_alter');
+}
