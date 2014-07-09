@@ -22,6 +22,9 @@ function ds_designssquare_lib_process_file_managed($element, &$form_state, $form
         // Save.
         //@ToDo see how to update instead save because it creates double reference in the file_managed table(see 'count')
         file_save($file);
+
+        //set variable as well
+        variable_set($element['#name'], $file->fid);
     }
 
     //file removed
@@ -38,3 +41,8 @@ function ds_designssquare_lib_process_file_managed($element, &$form_state, $form
 
     return $element;
 }
+
+//submit function
+//function ds_file_managed_submit($form, &$form_state){
+//    drupal_set_message(t('theme settings saved'));
+//}
