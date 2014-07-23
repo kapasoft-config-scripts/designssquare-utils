@@ -1,5 +1,24 @@
 <?php
 
+/*******Theme Custom Settings******/
+function _theme_settings($theme_name){
+    $theme_tapi = array();
+
+    //scheme-color
+    $theme_tapi['color'] = variable_get('ds_theme_color', theme_get_setting('ds_theme_color'));
+
+    //layout - boxed, wide, semi-wide
+    $theme_tapi['layout'] = variable_get('ds_theme_layout', theme_get_setting('ds_theme_layout'));
+
+    //background image - image full name
+    $theme_tapi['bg-img'] = variable_get('ds_theme_gb_img', theme_get_setting('ds_theme_gb_img'));
+
+    //background color - image full name
+    $theme_tapi['bg-color'] = variable_get('ds_theme_bg_color', theme_get_setting('ds_theme_bg_color'));
+
+    return $theme_tapi;
+}
+
 /******Event********/
 function _event_teaser_tapi($event){
     $event_tapi = array();
