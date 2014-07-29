@@ -334,6 +334,88 @@ function _gallery_tapi($node)
 
     return $gallery_tapi;
 }
+/*****SERVICE*******/
+function _service_teaser_tapi($service)
+{
+    module_load_include('module', 'designssquare_lib');
+    $service_tapi = array();
+
+    if(isset($service)) {
+        $service_tapi['url'] = base_path().drupal_get_path_alias('node/' . $service->nid); //url to a project
+        $service_tapi['title'] = $service->title;
+        $field_instance = field_get_items('node', $service, 'field_ds_service_summary');
+        $field_value = ($field_instance) ? field_view_value('node', $service, 'field_ds_service_summary', $field_instance[0]) : '';
+        $service_tapi['summary'] = htmlspecialchars_decode(render($field_value));
+        $field_instance = field_get_items('node', $service, 'field_ds_service_featured_img');
+        $field_value = ($field_instance) ? array_shift($field_instance) : '';
+        $service_tapi['featured_img'] = array();
+        $service_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
+        $service_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+    }else{
+        $service_tapi['url'] = ''; //url to a project
+        $service_tapi['title'] = '';
+        $service_tapi['summary'] = '';
+        $service_tapi['featured_img'] = array();
+        $service_tapi['featured_img']['url'] = '';
+        $service_tapi['featured_img']['alt'] = '';
+    }
+
+    //provide contextual links
+    $service_tapi['ds_contextual_links'] = node_contextual_links($service);
+
+    return $service_tapi;
+}
+
+function _service_tapi($node)
+{
+    $service_tapi = _service_teaser_tapi($node);
+
+    if (isset($node) && !empty($node)) {
+        $field_instance = field_get_items('node', $node, 'body');
+        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
+        $service_tapi['content'] = render($content);
+        $service_tapi['index'] = array();
+        $service_tapi['index']['next'] = array();
+        $id_next_node = next_node($node);
+        if (isset($id_next_node)) {
+            $service_tapi['index']['next']['is_present'] = TRUE;
+            $service_tapi['index']['next']['url'] = base_path() . drupal_get_path_alias('node/' . $id_next_node);
+            $service_tapi['index']['next']['text'] = t('Next');
+        } else {
+            $service_tapi['index']['next']['is_present'] = FALSE;
+        }
+
+        $id_previous_node = previous_node($node);
+        $service_tapi['index']['previous'] = array();
+        if (isset($id_previous_node)) {
+            $service_tapi['index']['previous']['is_present'] = TRUE;
+            $service_tapi['index']['previous']['text'] = t('Previous');
+            $service_tapi['index']['previous']['url'] = base_path() . drupal_get_path_alias('node/' . $id_previous_node);
+        } else {
+            $service_tapi['index']['previous']['is_present'] = FALSE;
+        }
+
+//        $service_tapi['project_img'] = array();
+//        $field_instance = field_get_items('node', $node, 'field_ds_service_images');
+//        foreach ($field_instance as $key => $service_img) {
+//            $service_tapi['project_img'][$key]['url'] = (isset($service_img['uri'])) ? file_create_url($service_img['uri']) : '';
+//            $service_tapi['project_img'][$key]['alt'] = (isset($service_img['alt'])) ? $service_img['alt'] : '';
+//        }
+    } else {
+        $service_tapi['content'] = '';
+        $service_tapi['index'] = array();
+        $service_tapi['index']['next'] = array();
+        $service_tapi['index']['next']['url'] = '';
+        $service_tapi['index']['next']['text'] = '';
+        $service_tapi['index']['previous'] = array();
+        $service_tapi['index']['previous']['text'] = '';
+        $service_tapi['index']['previous']['url'] = '';
+//        $service_tapi['project_img'] = array();
+    }
+
+    return $service_tapi;
+}
+
 
 /*****PORTFOLIO*******/
 function _project_teaser_tapi($project)

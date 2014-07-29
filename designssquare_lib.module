@@ -501,6 +501,7 @@ function import_flex_slider(&$vars, $options = array()){
     $slider_tapi['nav_left_offset'] = (isset($options['nav_left_offset']) && !empty($options['nav_left_offset'])) ? $options['nav_left_top'] : '0';
     $slider_tapi['nav_right_top'] = (isset($options['nav_right_top']) && !empty($options['nav_right_top'])) ? $options['nav_right_top'] : '50%';
     $slider_tapi['nav_right_offset'] = (isset($options['nav_right_offset']) && !empty($options['nav_right_offset'])) ? $options['nav_right_offset'] : '0';
+    $slider_tapi['num_items_slide'] = (isset($options['num_items_slide']) && !empty($options['num_items_slide'])) ? $options['num_items_slide'] : 4;
 
     $vars['slider_tapi'] = $slider_tapi;
 
@@ -519,7 +520,6 @@ function import_flex_slider(&$vars, $options = array()){
     $startAt = (isset($options['startAt']) && !empty($options['startAt'])) ? $options['startAt'] : 0;//Integer: The slide that the slider should start on. Array notation (0 = first slide)
     $slideshow = (isset($options['slideshow']) && !empty($options['slideshow'])) ? $options['slideshow'] : "true";//Boolean: Animate slider automatically
     $smoothHeight = (isset($options['smoothHeight']) && !empty($options['smoothHeight'])) ? $options['smoothHeight'] : "false";//Integer: Set the speed of the slideshow cycling, in milliseconds
-    $slideshowSpeed = (isset($options['slideshowSpeed']) && !empty($options['slideshowSpeed'])) ? $options['slideshowSpeed'] : 7000;
     $animationSpeed = (isset($options['animationSpeed']) && !empty($options['animationSpeed'])) ? $options['animationSpeed'] : 600;//Integer: Set the speed of animations, in milliseconds
     $initDelay = (isset($options['initDelay']) && !empty($options['initDelay'])) ? $options['initDelay'] : 0;//{NEW} Integer: Set an initialization delay, in milliseconds
     $randomize = (isset($options['randomize']) && !empty($options['randomize'])) ? $options['randomize'] : "false";//Boolean: Randomize slide order
@@ -561,7 +561,7 @@ function import_flex_slider(&$vars, $options = array()){
     $minItems = (isset($options['minItems']) && !empty($options['minItems'])) ? $options['minItems'] : 1;//{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
     $maxItems = (isset($options['maxItems']) && !empty($options['maxItems'])) ? $options['maxItems'] : 0;//{NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
     $allowOneSlide = (isset($options['allowOneSlide']) && !empty($options['allowOneSlide'])) ? $options['allowOneSlide'] : "true";//{NEW} Boolean: Whether or not to allow a slider comprised of a single slide
-    $move = (isset($options['num_items_slide']) && !empty($options['num_items_slide'])) ? $options['num_items_slide'] + 1 : 0;
+    $move = (isset($options['num_items_slide']) && !empty($options['num_items_slide'])) ? $options['num_items_slide'] : 0;
 
 
     drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 3,'type' => 'file'));
