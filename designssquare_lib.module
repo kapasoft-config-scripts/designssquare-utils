@@ -493,7 +493,8 @@ function import_flex_slider(&$vars, $options = array()){
     $slider_tapi = array();
     $classes = array();
     $classes[] = 'ds-flex-slider';//for styling
-    $classes[] = (isset($options['slider_id']) && !empty($options['slider_id'])) ? $options['slider_id'] : 'ds-flex-slider';
+    $slider_tapi['slider_id'] = (isset($options['slider_id']) && !empty($options['slider_id'])) ? $options['slider_id'] : 'ds-flex-slider';
+    $classes[] = $slider_tapi['slider_id'];
     $slider_tapi['class'] = implode(' ', $classes);
 
     //nav controls
@@ -565,7 +566,9 @@ function import_flex_slider(&$vars, $options = array()){
 
 
     drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 3,'type' => 'file'));
+//    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider-2.0.css', array('group' => CSS_THEME + 3,'type' => 'file'));
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/FlexSlider/flex-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
+//    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider-2.0.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     $inline_js = 'jQuery.noConflict()(function ($) {' . "\n";
     $inline_js .= '$(window).load(function() {' . "\n";
@@ -894,8 +897,8 @@ function module_preprocessors($hook){
     //retrieve all modules with the hook - preprocess_page
     $modules = module_list();
     foreach($modules as $module){
-        if (module_hook($module, 'preprocess_page')) {
-            $preprocessors[] = $module.'_preprocess_page';
+        if (module_hook($module, $hook)) {
+            $preprocessors[] = $module.'_'.$hook;
         }
     }
 

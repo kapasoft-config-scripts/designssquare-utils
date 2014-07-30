@@ -74,8 +74,8 @@ function _podcast_teaser_tapi($podcast)
             $podcast_tapi['featured_img']['height'] = '';
         }else{
             $thumb_effect = array_shift($image_style['effects']);
-            $podcast_tapi['featured_img']['width'] = $thumb_effect['data']['width'];
-            $podcast_tapi['featured_img']['height'] = $thumb_effect['data']['height'];
+            $podcast_tapi['featured_img']['width'] = $thumb_effect['data']['width'].'px';
+            $podcast_tapi['featured_img']['height'] = $thumb_effect['data']['height'].'px';
         }
 
         $field_instance = field_get_items('node', $podcast, 'field_ds_podcast_download');
@@ -148,8 +148,8 @@ function _podcast_tapi($node)
         $podcast_tapi['block_img']['height'] = '';
     }else{
         $thumb_effect = array_shift($image_style['effects']);
-        $podcast_tapi['block_img']['width'] = $thumb_effect['data']['width'];
-        $podcast_tapi['block_img']['height'] = $thumb_effect['data']['height'];
+        $podcast_tapi['block_img']['width'] = $thumb_effect['data']['width'].'px';
+        $podcast_tapi['block_img']['height'] = $thumb_effect['data']['height'].'px';
     }
 
     return $podcast_tapi;
@@ -242,8 +242,8 @@ function _gallery_teaser_tapi($project)
             $gallery_tapi['featured_img']['height'] = '';
         }else{
             $thumb_effect = array_shift($image_style['effects']);
-            $gallery_tapi['featured_img']['width'] = $thumb_effect['data']['width'];
-            $gallery_tapi['featured_img']['height'] = $thumb_effect['data']['height'];
+            $gallery_tapi['featured_img']['width'] = $thumb_effect['data']['width'].'px';
+            $gallery_tapi['featured_img']['height'] = $thumb_effect['data']['height'].'px';
         }
 
         //images size for the block
@@ -254,8 +254,8 @@ function _gallery_teaser_tapi($project)
             $gallery_tapi['block_img']['height'] = '';
         }else{
             $thumb_effect = array_shift($image_style['effects']);
-            $gallery_tapi['block_img']['width'] = $thumb_effect['data']['width'];
-            $gallery_tapi['block_img']['height'] = $thumb_effect['data']['height'];
+            $gallery_tapi['block_img']['width'] = $thumb_effect['data']['width'].'px';
+            $gallery_tapi['block_img']['height'] = $thumb_effect['data']['height'].'px';
         }
 
     }else{
@@ -285,8 +285,8 @@ function _gallery_tapi($node)
         $gallery_tapi['gallery_focus_img']['height'] = '';
     }else{
         $thumb_effect = array_shift($image_style['effects']);
-        $gallery_tapi['gallery_focus_img']['width'] = $thumb_effect['data']['width'];
-        $gallery_tapi['gallery_focus_img']['height'] = $thumb_effect['data']['height'];
+        $gallery_tapi['gallery_focus_img']['width'] = $thumb_effect['data']['width'].'px';
+        $gallery_tapi['gallery_focus_img']['height'] = $thumb_effect['data']['height'].'px';
     }
 
     if (isset($node) && !empty($node)) {
@@ -345,12 +345,26 @@ function _service_teaser_tapi($service)
         $service_tapi['title'] = $service->title;
         $field_instance = field_get_items('node', $service, 'field_ds_service_summary');
         $field_value = ($field_instance) ? field_view_value('node', $service, 'field_ds_service_summary', $field_instance[0]) : '';
-        $service_tapi['summary'] = htmlspecialchars_decode(render($field_value));
+        $summary = htmlspecialchars_decode(render($field_value));
+        $service_tapi['summary'] = (isset($summary)) ? truncate_utf8($summary, 200, true, true) : '' ;
+
         $field_instance = field_get_items('node', $service, 'field_ds_service_featured_img');
         $field_value = ($field_instance) ? array_shift($field_instance) : '';
         $service_tapi['featured_img'] = array();
         $service_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
         $service_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
+
+        //images size for the teaser
+        $image_style = image_style_load('ds_service_teaser_img');
+        if(empty($image_style)){
+            $service_tapi['featured_img']['width'] = '';
+            $service_tapi['featured_img']['height'] = '';
+        }else{
+            $thumb_effect = array_shift($image_style['effects']);
+            $service_tapi['featured_img']['width'] = $thumb_effect['data']['width'].'px';
+            $service_tapi['featured_img']['height'] = $thumb_effect['data']['height'].'px';
+        }
+
     }else{
         $service_tapi['url'] = ''; //url to a project
         $service_tapi['title'] = '';
