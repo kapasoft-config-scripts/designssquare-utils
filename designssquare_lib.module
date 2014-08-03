@@ -783,7 +783,7 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/rev_slider-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.plugins.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.revolution.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 5));
-    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/fix.rev.slider.js', array('scope' => 'footer', 'type' => 'file', 'weight' => 5));
+//    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/fix.rev.slider.js', array('scope' => 'footer', 'type' => 'file', 'weight' => 5));
 
     $inline_js = ' var tpj=jQuery; ' . "\n";
     $inline_js .= 'tpj.noConflict();' . "\n";

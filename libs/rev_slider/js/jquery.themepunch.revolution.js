@@ -352,7 +352,8 @@
 									}
 
 
-									container.find('ul').css({'display':'none'});
+									container.find('ul[class!=contextual-links]').css({'display':'none'});
+//                            		container.find("ul:has(class^=contextual-links])").css({'display':'none'});
 
 									var fliparent = container;
 
@@ -368,8 +369,10 @@
 									// IF IMAGES HAS BEEN LOADED
 									fliparent.waitForImages(function() {
 												// PREPARE THE SLIDES
-												container.find('ul').css({'display':'block'});
-												prepareSlides(container,opt);
+//												container.find('ul').css({'display':'block'});
+                                        container.find("ul[class!=contextual-links]").css({'display':'block'});
+
+                                        prepareSlides(container,opt);
 
 												// CREATE BULLETS
 												if (opt.slideamount >1) createBullets(container,opt);
