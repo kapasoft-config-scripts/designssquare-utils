@@ -1,4 +1,19 @@
 <?php
+
+/*
+ * disable wysiwyg editor for comments
+ *
+ * */
+function designssquare_lib_form_alter (&$form, &$form_state, $form_id)
+{
+    // comments
+    // http://api.drupal.org/api/drupal/modules--comment--comment.module/function/comment_form/6
+
+    if ($form['#id'] == 'comment-form') {
+        $form['comment_filter']['format'] = array(); // nuke wysiwyg from comments
+    }
+}
+
 /*********Functionality********/
 function designssquare_lib_js_alter(&$javascript) {
     if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.8') === '1.10'){
@@ -757,16 +772,19 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
     $fullWidth = (isset($options['fullWidth']) && !empty($options['fullWidth'])) ? $options['fullWidth'] : 'off' ;
 
 
-
     //process class values
     $slider_tapi['outer'] = implode(' ', $outer);
     $slider_tapi['inner'] = implode(' ', $inner);
     $vars['slider_tapi'] = $slider_tapi;
 
     drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/rev_slider/css/rev_slider_settings.css', array('group' => CSS_THEME + 3,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/dynamics-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/static-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/rev_slider-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.plugins.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.revolution.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 5));
+    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/fix.rev.slider.js', array('scope' => 'footer', 'type' => 'file', 'weight' => 5));
+
     $inline_js = ' var tpj=jQuery; ' . "\n";
     $inline_js .= 'tpj.noConflict();' . "\n";
     $inline_js .= '    if (tpj.fn.cssOriginal!=undefined){' . "\n";

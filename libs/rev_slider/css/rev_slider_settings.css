@@ -680,13 +680,13 @@ zoom: 1;
 }
 
 
-.tp-simpleresponsive ul {
+.tp-simpleresponsive >ul {
 	list-style:none;
 	padding:0;
 	margin:0;
 }
 
-.tp-simpleresponsive >ul li{
+.tp-simpleresponsive >ul >li{
 	list-style:none;
 	position:absolute;
 	visibility:hidden;
@@ -701,3 +701,26 @@ zoom: 1;
 				-moz-border-radius: 3px;
 				-webkit-border-radius: 3px;
 			}
+
+
+/*From DS Specific To Slider Widget*/
+/*div.contextual-links-wrapper ul.contextual-links.node-context-links{*/
+    /*top:30px;*/
+    /*border:solid red thin;*/
+    /*display: none;*/
+/*}*/
+/*div.contextual-links-wrapper ul.contextual-links.node-context-links{*/
+    /*top:30px;*/
+    /*border:solid red thin;*/
+    /*right:-50px;*/
+    /*background-color: blue;*/
+    /*z-index: 999;*/
+    /*position:relative;*/
+
+/*}*/
+
+/*ul.contextual-links.node-context-links > li{*/
+     /*list-style:none;*/
+     /*position:relative;*/
+     /*visibility:visible;*/
+ /*}*/
