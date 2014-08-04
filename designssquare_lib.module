@@ -459,6 +459,32 @@ function previous_node($node){
 
 
 /*********CONTEXTUAL LINKS************/
+
+/* generates contextual link for the block
+ * @param: $module_name
+ *      name of the module implementing blocks
+ * @param: $amdin_menu_url
+ *      url as specified for editing blocks in the $module_name module
+ * @param: $block_id
+ *      the unique id of the block for the contextual links
+ *
+ * @return renderable array of the contextual links to render or empty string if user not authorized
+ * EXAMPLE: <?php print render(@return);?>
+ */
+
+function block_contextual_links($module_name, $admin_menu_url, $block_id)
+{
+    module_load_include('module', 'contextual');
+    $contextual_links = contextual_element_info();
+    $contextual_links['contextual_links']['#contextual_links'] = array(
+        $module_name => array($admin_menu_url, array($block_id)),
+    );
+
+    global $user;
+
+    return ($user->uid == 0) ? '' : $contextual_links['contextual_links'];
+}
+
 //generates contextual link for the node
 function node_contextual_links($node){
     $contextual_links = contextual_element_info();

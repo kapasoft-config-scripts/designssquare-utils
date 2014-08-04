@@ -386,7 +386,7 @@ function _service_tapi($node)
 
     if (isset($node) && !empty($node)) {
         $field_instance = field_get_items('node', $node, 'body');
-        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
+        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0], 'full') : '';
         $service_tapi['content'] = render($content);
         $service_tapi['index'] = array();
         $service_tapi['index']['next'] = array();
