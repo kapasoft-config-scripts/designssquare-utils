@@ -804,7 +804,7 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
     $vars['slider_tapi'] = $slider_tapi;
 
     drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/rev_slider/css/rev_slider_settings.css', array('group' => CSS_THEME + 3,'type' => 'file'));
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/dynamics-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/dynamic-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/static-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/rev_slider-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.plugins.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
