@@ -1,7 +1,7 @@
-name = DesignsSquare.com Library
+name = DesignsSquare.com Library - PLAYGROUND
 description = shared common utilities for designssquare.com widgets and themes
 core = 7.x
-version = v.0.2.2
+version = v.0.1
 project = designssquare_lib
 package = DesignsSquare.com.utilities
 
