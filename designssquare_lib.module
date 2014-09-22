@@ -16,7 +16,7 @@ function designssquare_lib_form_alter (&$form, &$form_state, $form_id)
 
 /*********Functionality********/
 function designssquare_lib_js_alter(&$javascript) {
-    if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.8') === '1.10'){
+    if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.8') > '1.7'){
         //use jquery_updates ui libraries instead the drupal core
         foreach($javascript as $key => $js_path){
             $token_path = explode("/", $key);
@@ -33,6 +33,32 @@ function designssquare_lib_js_alter(&$javascript) {
             }
         }
     }
+}
+
+/**
+ * Replaces Drupal jquery with another jquery version
+ * @param $javascript
+ * @param $new_path
+ *      path to the new jquery lib
+ * @param $ver
+ *      version of the jquery
+ */
+function replace_jquery(&$javascript,$new_path,$ver) {
+
+        //use jquery_updates ui libraries instead the drupal core
+        foreach($javascript as $key => $js_path){
+            $token_path = explode("/", $key);
+            $current_js_lib = $token_path[count($token_path) - 1];
+            //add legacy support for other modules still using Jquery legacy library
+            if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
+//                $new_path = $new_path;
+                $data = $js_path;
+                $data['version'] = $ver;
+                $data['data'] = $new_path;
+//                $data['weight'] = $js_path['weight'] + 0.01;
+                $javascript[$new_path] = $data;
+            }
+        }
 }
 
 /**********API***********/
@@ -955,4 +981,31 @@ function module_preprocessors($hook){
 function designssquare_lib_init(){
     //load for processing file_managed on Ajax calls(i.e. upload, remove)
     module_load_include('inc', 'designssquare_lib', 'inc/file_managed_alter');
+}
+
+/**
+ * retrieve menu links for particular menu and wrap into path alias before returning
+ * @param: menu_name
+ *     name of the menu (i.e. main-menu)
+ *
+ * return: Array
+ *      list of menu links
+ *          'title'
+ *          'url'
+ */
+function get_menu_links($name){
+    $mainMenuArray = menu_load_links($name);
+    $finalMainMenu = array();
+    foreach($mainMenuArray as $key=> $menuItem){
+        $finalMainMenu[$key]['active'] = false;
+        $linkPath = $menuItem['link_path'];
+        $linkPathAlias = drupal_get_path_alias($linkPath);
+        $current_path = $_GET['q'];
+//        $currentId = $vars['node']->nid;
+//        if(drupal_get_path_alias("node/$currentId") == $linkPathAlias)$finalMainMenu[$key]['active'] = true;
+        if(drupal_get_path_alias($current_path) == $linkPathAlias){$finalMainMenu[$key]['active'] = true;}
+        $finalMainMenu[$key]['url'] = $linkPathAlias;
+        $finalMainMenu[$key]['title'] = $menuItem['link_title'];
+    }
+   return $finalMainMenu;
 }
