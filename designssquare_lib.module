@@ -301,7 +301,12 @@ function get_node_from_cache()
     if ($content) {
         //cache is set
         $node_wrap = (isset($content['nodes'])) ? array_slice($content['nodes'], 0, 1) : null;
-        $current_node = (isset($node_wrap) && !empty($node_wrap)) ? array_values($node_wrap)[0]['#node'] : null;
+        if(isset($node_wrap) && !empty($node_wrap)){
+            $temp =  array_values($node_wrap);
+            $current_node = $temp[0]['#node'];
+        }else{
+            $current_node = null;
+        }
     } else {
         //cache not set, lets try to load from path
         if ((arg(0) == 'node') && arg(1) && is_numeric(arg(1))) {
