@@ -25,7 +25,7 @@ function designssquare_lib_js_alter(&$javascript) {
 
             //add legacy support for other modules still using Jquery legacy library
             if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
-                $new_path = drupal_get_path('module', 'designssquare_lib').'/js/jquery/jquery-migrate.min.js';
+                $new_path = '/'.drupal_get_path('module', 'designssquare_lib').'/js/jquery/jquery-migrate.min.js';
                 $data = $js_path;
                 $data['version'] = "1.2.1";
                 $data['data'] = $new_path;
