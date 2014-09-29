@@ -16,7 +16,8 @@ function designssquare_lib_form_alter (&$form, &$form_state, $form_id)
 
 /*********Functionality********/
 function designssquare_lib_js_alter(&$javascript) {
-    if($jQuery_ver = variable_get('jquery_update_jquery_version', '1.8') > '1.7'){
+//    global $conf;
+        if(module_exists('jquery_update') && version_compare(variable_get('jquery_update_jquery_version', 0), 1.7, '>=')){
         //use jquery_updates ui libraries instead the drupal core
         foreach($javascript as $key => $js_path){
             $token_path = explode("/", $key);
@@ -38,6 +39,7 @@ function designssquare_lib_js_alter(&$javascript) {
 /**
  * Replaces Drupal jquery with another jquery version
  * @param $javascript
+ *      the list of all js scripts as passed through hook_js_alter
  * @param $new_path
  *      path to the new jquery lib
  * @param $ver
@@ -57,6 +59,7 @@ function replace_jquery(&$javascript,$new_path,$ver) {
                 $data['data'] = $new_path;
 //                $data['weight'] = $js_path['weight'] + 0.01;
                 $javascript[$new_path] = $data;
+                unset($javascript[$key]);
             }
         }
 }
@@ -151,6 +154,11 @@ function include_blocks(&$vars, $scope = 'page')
         }
 
         if (!empty($ctx_plugin) && ($region_key !== 'content')) {
+
+            //load blocks to cache them to avoid
+            $list = $ctx_plugin->block_list($region_key);
+            _block_render_blocks($list);
+
             if ($scope == 'html') {
                 //blocks not build in html scope, so we build it manually
                 $region_blocks = $ctx_plugin->block_list($region_key);
@@ -194,8 +202,15 @@ function include_blocks_from_region($region_key, &$vars)
         $blocks = block_get_blocks_by_region($region_key);
     }
     if (!empty($ctx_plugin)) {
+        //load blocks to cache them to avoid
+        //Notice: Undefined property: stdClass::$content in _block_get_renderable_array() (line 337 of
+        $list = $ctx_plugin->block_list($region_key);
+        _block_render_blocks($list);
+
         $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
     }
+
+
 
     if (isset($ctx_blocks) && isset($blocks)) {
         //there are blocks from the context as well from blocks module
@@ -426,7 +441,7 @@ function _get_file_name($uri)
 function include_jquery_legacy_support(&$javascript)
 {
     $migrate_js = '';
-    if ($jQuery_ver = variable_get('jquery_update_jquery_version', '1.08') > '1.07') {
+    if (module_exists('jquery_update') && version_compare(variable_get('jquery_update_jquery_version', 0), 1.7, '>=')) {
         //use jquery_updates ui libraries instead the drupal core
         foreach ($javascript as $key => $js_path) {
             $token_path = explode("/", $key);
