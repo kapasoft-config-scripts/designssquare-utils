@@ -1029,3 +1029,52 @@ function get_menu_links($name){
     }
    return $finalMainMenu;
 }
+
+/**
+ * retrieves all blocks into array with key of block delta and value the StdObject of the block
+ */
+function get_all_blocks(){
+    //            $block = get_block_by_name($block_name);
+
+    $all_blocks = array();
+    $default_theme = variable_get('theme_default', 'bartik');
+//        $default_theme = $GLOBALS['theme'];
+    //retrieve context plugin as alternative for managing blocks
+    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
+    $all_regions = array_diff_key(system_region_list($default_theme), array('dashboard_main' =>'','dashboard_sidebar'=>'','dashboard_inactive'=>''));
+    foreach ($all_regions as $region_key => $region_name) {
+        $ctx_blocks = array();
+        $blocks = array();
+        if (block_get_blocks_by_region($region_key)) {
+            $blocks = block_get_blocks_by_region($region_key);
+            unset($blocks['#sorted']);
+        }
+
+        if (!empty($ctx_plugin) && ($region_key !== 'content')) {
+            //load blocks to cache them to avoid error
+//                    $list = $ctx_plugin->block_list($region_key);
+//                    _block_render_blocks($list);
+
+            //blocks not build in html scope, so we build it manually
+            $ctx_blocks = $ctx_plugin->block_list($region_key);
+//            $ctx_blocks = _block_get_renderable_array(_block_render_blocks($region_blocks));
+        }
+        $all_blocks = array_merge($all_blocks, $blocks, $ctx_blocks);
+    }
+
+    //add blocks not assigned to no region
+
+    return _format_block_list($all_blocks);
+}
+
+function _format_block_list($blocks){
+    $final_list = array();
+    foreach($blocks as $block){
+        if(is_array($block)){
+            $final_list[$block['#block']->delta] = $block['#block'];
+        }else{
+            $final_list[$block->delta] = $block;
+        }
+    }
+    return $final_list;
+}
