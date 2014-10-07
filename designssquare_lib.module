@@ -4,7 +4,7 @@
  * disable wysiwyg editor for comments
  *
  * */
-function designssquare_lib_form_alter (&$form, &$form_state, $form_id)
+function designssquare_lib_form_alter(&$form, &$form_state, $form_id)
 {
     // comments
     // http://api.drupal.org/api/drupal/modules--comment--comment.module/function/comment_form/6
@@ -15,17 +15,18 @@ function designssquare_lib_form_alter (&$form, &$form_state, $form_id)
 }
 
 /*********Functionality********/
-function designssquare_lib_js_alter(&$javascript) {
+function designssquare_lib_js_alter(&$javascript)
+{
 //    global $conf;
-        if(module_exists('jquery_update') && version_compare(variable_get('jquery_update_jquery_version', 0), 1.7, '>=')){
+    if (module_exists('jquery_update') && version_compare(variable_get('jquery_update_jquery_version', 0), 1.7, '>=')) {
         //use jquery_updates ui libraries instead the drupal core
-        foreach($javascript as $key => $js_path){
+        foreach ($javascript as $key => $js_path) {
             $token_path = explode("/", $key);
             $current_js_lib = $token_path[count($token_path) - 1];
 
             //add legacy support for other modules still using Jquery legacy library
-            if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
-                $new_path = '/'.drupal_get_path('module', 'designssquare_lib').'/js/jquery/jquery-migrate.min.js';
+            if ($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js') {
+                $new_path = '/' . drupal_get_path('module', 'designssquare_lib') . '/js/jquery/jquery-migrate.min.js';
                 $data = $js_path;
                 $data['version'] = "1.2.1";
                 $data['data'] = $new_path;
@@ -45,23 +46,24 @@ function designssquare_lib_js_alter(&$javascript) {
  * @param $ver
  *      version of the jquery
  */
-function replace_jquery(&$javascript,$new_path,$ver) {
+function replace_jquery(&$javascript, $new_path, $ver)
+{
 
-        //use jquery_updates ui libraries instead the drupal core
-        foreach($javascript as $key => $js_path){
-            $token_path = explode("/", $key);
-            $current_js_lib = $token_path[count($token_path) - 1];
-            //add legacy support for other modules still using Jquery legacy library
-            if($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js'){
+    //use jquery_updates ui libraries instead the drupal core
+    foreach ($javascript as $key => $js_path) {
+        $token_path = explode("/", $key);
+        $current_js_lib = $token_path[count($token_path) - 1];
+        //add legacy support for other modules still using Jquery legacy library
+        if ($current_js_lib == 'jquery.min.js' || $current_js_lib == 'jquery.js') {
 //                $new_path = $new_path;
-                $data = $js_path;
-                $data['version'] = $ver;
-                $data['data'] = $new_path;
+            $data = $js_path;
+            $data['version'] = $ver;
+            $data['data'] = $new_path;
 //                $data['weight'] = $js_path['weight'] + 0.01;
-                $javascript[$new_path] = $data;
-                unset($javascript[$key]);
-            }
+            $javascript[$new_path] = $data;
+            unset($javascript[$key]);
         }
+    }
 }
 
 /**********API***********/
@@ -211,7 +213,6 @@ function include_blocks_from_region($region_key, &$vars)
     }
 
 
-
     if (isset($ctx_blocks) && isset($blocks)) {
         //there are blocks from the context as well from blocks module
         $all_blocks = array_merge($blocks, $ctx_blocks);
@@ -273,7 +274,7 @@ function get_template_path($module_name, $template_name)
     //substract the template file without relative path
     $path_tokens = explode("/", $template_name);
     $template_file_name = array_pop($path_tokens);
-    $hook_template_name = preg_replace('/-/','_', $template_file_name);
+    $hook_template_name = preg_replace('/-/', '_', $template_file_name);
     //hook to let others modify template
     drupal_alter($hook_template_name, $path_to_template);
 
@@ -316,10 +317,10 @@ function get_node_from_cache()
     if ($content) {
         //cache is set
         $node_wrap = (isset($content['nodes'])) ? array_slice($content['nodes'], 0, 1) : null;
-        if(isset($node_wrap) && !empty($node_wrap)){
-            $temp =  array_values($node_wrap);
+        if (isset($node_wrap) && !empty($node_wrap)) {
+            $temp = array_values($node_wrap);
             $current_node = $temp[0]['#node'];
-        }else{
+        } else {
             $current_node = null;
         }
     } else {
@@ -332,7 +333,8 @@ function get_node_from_cache()
     return $current_node;
 }
 
-function get_content_from_cache(){
+function get_content_from_cache()
+{
     //get the current content from cache
     $content = drupal_set_page_content();
     //indicate that you are not adding content but just reading it by setting static variable 'system...added' to False
@@ -463,13 +465,13 @@ function include_jquery_legacy_support(&$javascript)
 }
 
 
-
 //find next node by id with the same content type
-function next_node($node){
+function next_node($node)
+{
     //Build query
     $query = new EntityFieldQuery();
 
-   //Only show of specific content type
+    //Only show of specific content type
     $query->entityCondition('bundle', $node->type);
     $query->entityCondition('entity_type', 'node');
 
@@ -486,7 +488,8 @@ function next_node($node){
 }
 
 //find previous node by id with the same content type
-function previous_node($node){
+function previous_node($node)
+{
     //Build query
     $query = new EntityFieldQuery();
 
@@ -534,7 +537,8 @@ function block_contextual_links($module_name, $admin_menu_url, $block_id)
 }
 
 //generates contextual link for the node
-function node_contextual_links($node){
+function node_contextual_links($node)
+{
     $contextual_links = contextual_element_info();
     $contextual_links['contextual_links']['#contextual_links'] = array(
         'node' => array('node', array((isset($node->nid)) ? $node->nid : '')),
@@ -544,11 +548,12 @@ function node_contextual_links($node){
 }
 
 //generates contextual links for the view
-function view_contextual_links($view){
+function view_contextual_links($view)
+{
     //provide contextual links
     $contextual_links = contextual_element_info();
     $contextual_links['contextual_links']['#contextual_links'] = array(
-        'views' => array('admin/structure/views/view/'.$view->name, array($view->current_display)),
+        'views' => array('admin/structure/views/view/' . $view->name, array($view->current_display)),
     );
 
     return $contextual_links['contextual_links'];
@@ -557,8 +562,8 @@ function view_contextual_links($view){
 /**********Slider*************/
 //includes teh FlexSlider JS/CSS Libs and initiates slider with id provided in parameter $options
 /**
-*
-*@params: $vars
+ *
+ * @params: $vars
  *   -array passed to the template eventually
  *
  * @params: $options
@@ -571,17 +576,18 @@ function view_contextual_links($view){
  * $options['nav_right_offset'] = specifies distance from the side of the slider to position nav control
  *
  * $options['num_items_slide'] = number of frames in one slide???
-*
-*
-*
+ *
+ *
+ *
  ******/
 
-function import_flex_slider(&$vars, $options = array()){
+function import_flex_slider(&$vars, $options = array())
+{
 
     //template specific
     $slider_tapi = array();
     $classes = array();
-    $classes[] = 'ds-flex-slider';//for styling
+    $classes[] = 'ds-flex-slider'; //for styling
     $slider_tapi['slider_id'] = (isset($options['slider_id']) && !empty($options['slider_id'])) ? $options['slider_id'] : 'ds-flex-slider';
     $classes[] = $slider_tapi['slider_id'];
     $slider_tapi['class'] = implode(' ', $classes);
@@ -596,115 +602,115 @@ function import_flex_slider(&$vars, $options = array()){
     $vars['slider_tapi'] = $slider_tapi;
 
     //flex slider specific
-    $namespace = (isset($options['namespace']) && !empty($options['namespace'])) ? $options['namespace'] : 'flex-';  //{NEW} String: Prefix string attached to the class of every element generated by the plugin
+    $namespace = (isset($options['namespace']) && !empty($options['namespace'])) ? $options['namespace'] : 'flex-'; //{NEW} String: Prefix string attached to the class of every element generated by the plugin
     $selector = (isset($options['selector']) && !empty($options['selector'])) ? $options['selector'] : ".slides > li"; //{NEW} Selector: Must match a simple pattern. '{container} > {slide}' -- Ignore pattern at your own peril
     $animation = (isset($options['animation']) && !empty($options['animation'])) ? $options['animation'] : "fade"; //String: Select your animation type, "fade" or "slide"
-    $easing = (isset($options['easing']) && !empty($options['easing'])) ? $options['easing'] : "swing";//{NEW} String: Determines the easing method used in jQuery transitions. jQuery easing plugin is supported!
-    $direction = (isset($options['direction']) && !empty($options['direction'])) ? $options['direction'] : "horizontal";//String: Select the sliding direction, "horizontal" or "vertical"
-    if(isset($options['reverse']) && !empty($options['reverse'])){
+    $easing = (isset($options['easing']) && !empty($options['easing'])) ? $options['easing'] : "swing"; //{NEW} String: Determines the easing method used in jQuery transitions. jQuery easing plugin is supported!
+    $direction = (isset($options['direction']) && !empty($options['direction'])) ? $options['direction'] : "horizontal"; //String: Select the sliding direction, "horizontal" or "vertical"
+    if (isset($options['reverse']) && !empty($options['reverse'])) {
         $reverse = $options['reverse'];
-    }else{
+    } else {
         $reverse = "false";
     } //{NEW} Boolean: Reverse the animation direction
     $animationLoop = (isset($options['animationLoop']) && !empty($options['animationLoop'])) ? $options['animationLoop'] : "true";
-    $startAt = (isset($options['startAt']) && !empty($options['startAt'])) ? $options['startAt'] : 0;//Integer: The slide that the slider should start on. Array notation (0 = first slide)
-    $slideshow = (isset($options['slideshow']) && !empty($options['slideshow'])) ? $options['slideshow'] : "true";//Boolean: Animate slider automatically
-    $smoothHeight = (isset($options['smoothHeight']) && !empty($options['smoothHeight'])) ? $options['smoothHeight'] : "false";//Integer: Set the speed of the slideshow cycling, in milliseconds
-    $animationSpeed = (isset($options['animationSpeed']) && !empty($options['animationSpeed'])) ? $options['animationSpeed'] : 600;//Integer: Set the speed of animations, in milliseconds
-    $initDelay = (isset($options['initDelay']) && !empty($options['initDelay'])) ? $options['initDelay'] : 0;//{NEW} Integer: Set an initialization delay, in milliseconds
-    $randomize = (isset($options['randomize']) && !empty($options['randomize'])) ? $options['randomize'] : "false";//Boolean: Randomize slide order
+    $startAt = (isset($options['startAt']) && !empty($options['startAt'])) ? $options['startAt'] : 0; //Integer: The slide that the slider should start on. Array notation (0 = first slide)
+    $slideshow = (isset($options['slideshow']) && !empty($options['slideshow'])) ? $options['slideshow'] : "true"; //Boolean: Animate slider automatically
+    $smoothHeight = (isset($options['smoothHeight']) && !empty($options['smoothHeight'])) ? $options['smoothHeight'] : "false"; //Integer: Set the speed of the slideshow cycling, in milliseconds
+    $animationSpeed = (isset($options['animationSpeed']) && !empty($options['animationSpeed'])) ? $options['animationSpeed'] : 600; //Integer: Set the speed of animations, in milliseconds
+    $initDelay = (isset($options['initDelay']) && !empty($options['initDelay'])) ? $options['initDelay'] : 0; //{NEW} Integer: Set an initialization delay, in milliseconds
+    $randomize = (isset($options['randomize']) && !empty($options['randomize'])) ? $options['randomize'] : "false"; //Boolean: Randomize slide order
     $fadeFirstSlide = (isset($options['fadeFirstSlide']) && !empty($options['fadeFirstSlide'])) ? $options['fadeFirstSlide'] : "true";
     $thumbCaptions = (isset($options['thumbCaptions']) && !empty($options['thumbCaptions'])) ? $options['thumbCaptions'] : "false";
     $slideshowSpeed = (isset($options['slideshowSpeed']) && !empty($options['slideshowSpeed'])) ? $options['slideshowSpeed'] : 7000;
 
     // Usability features
-    $pauseOnAction = (isset($options['pauseOnAction']) && !empty($options['pauseOnAction'])) ? $options['pauseOnAction'] : "true";//Boolean: Pause the slideshow when interacting with control elements, highly recommended.
-    $pauseOnHover = (isset($options['pauseOnHover']) && !empty($options['pauseOnHover'])) ? $options['pauseOnHover'] : "false";//Boolean: Pause the slideshow when interacting with control elements, highly recommended.
-    $pauseInvisible = (isset($options['pauseInvisible']) && !empty($options['pauseInvisible'])) ? $options['pauseInvisible'] : "true";//{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
-    $useCSS = (isset($options['useCSS']) && !empty($options['useCSS'])) ? $options['useCSS'] : "true";//{NEW} Boolean: Slider will use CSS3 transitions if available
-    $touch = (isset($options['touch']) && !empty($options['touch'])) ? $options['touch'] : "true";//{NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
-    $video = (isset($options['video']) && !empty($options['video'])) ? $options['video'] : "false";//{NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
+    $pauseOnAction = (isset($options['pauseOnAction']) && !empty($options['pauseOnAction'])) ? $options['pauseOnAction'] : "true"; //Boolean: Pause the slideshow when interacting with control elements, highly recommended.
+    $pauseOnHover = (isset($options['pauseOnHover']) && !empty($options['pauseOnHover'])) ? $options['pauseOnHover'] : "false"; //Boolean: Pause the slideshow when interacting with control elements, highly recommended.
+    $pauseInvisible = (isset($options['pauseInvisible']) && !empty($options['pauseInvisible'])) ? $options['pauseInvisible'] : "true"; //{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
+    $useCSS = (isset($options['useCSS']) && !empty($options['useCSS'])) ? $options['useCSS'] : "true"; //{NEW} Boolean: Slider will use CSS3 transitions if available
+    $touch = (isset($options['touch']) && !empty($options['touch'])) ? $options['touch'] : "true"; //{NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
+    $video = (isset($options['video']) && !empty($options['video'])) ? $options['video'] : "false"; //{NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
 
     // Primary Controls
     $controlNav = (isset($options['controlNav']) && !empty($options['controlNav'])) ? $options['controlNav'] : "true"; //Boolean: Create navigation for paging control of each clide? Note: Leave true for manualControls usage
-    $directionNav = (isset($options['directionNav']) && !empty($options['directionNav'])) ? $options['directionNav'] : "true";//Boolean: Create navigation for previous/next navigation? (true/false)
-    $prevText = (isset($options['prevText']) && !empty($options['prevText'])) ? $options['prevText'] : "Previous";//String: Set the text for the "previous" directionNav item
-    $nextText = (isset($options['nextText']) && !empty($options['nextText'])) ? $options['nextText'] : "Next";//String: Set the text for the "next" directionNav item
+    $directionNav = (isset($options['directionNav']) && !empty($options['directionNav'])) ? $options['directionNav'] : "true"; //Boolean: Create navigation for previous/next navigation? (true/false)
+    $prevText = (isset($options['prevText']) && !empty($options['prevText'])) ? $options['prevText'] : "Previous"; //String: Set the text for the "previous" directionNav item
+    $nextText = (isset($options['nextText']) && !empty($options['nextText'])) ? $options['nextText'] : "Next"; //String: Set the text for the "next" directionNav item
 
     // Secondary Navigation
-    $keyboard = (isset($options['keyboard']) && !empty($options['keyboard'])) ? $options['keyboard'] : true;//Boolean: Allow slider navigating via keyboard left/right keys
-    $multipleKeyboard = (isset($options['multipleKeyboard']) && !empty($options['multipleKeyboard'])) ? $options['multipleKeyboard'] : "false";//{NEW} Boolean: Allow keyboard navigation to affect multiple sliders. Default behavior cuts out keyboard navigation with more than one slider present.
-    $mousewheel = (isset($options['mousewheel']) && !empty($options['mousewheel'])) ? $options['mousewheel'] : "false";//{UPDATED} Boolean: Requires jquery.mousewheel.js (https://github.com/brandonaaron/jquery-mousewheel) - Allows slider navigating via mousewheel
-    $pausePlay = (isset($options['pausePlay']) && !empty($options['pausePlay'])) ? $options['pausePlay'] : "false";//Boolean: Create pause/play dynamic element
-    $pauseText = (isset($options['pauseText']) && !empty($options['pauseText'])) ? $options['pauseText'] : "Pause";//String: Set the text for the "pause" pausePlay item
-    $playText = (isset($options['playText']) && !empty($options['playText'])) ? $options['playText'] : "Play";//String: Set the text for the "play" pausePlay item
+    $keyboard = (isset($options['keyboard']) && !empty($options['keyboard'])) ? $options['keyboard'] : true; //Boolean: Allow slider navigating via keyboard left/right keys
+    $multipleKeyboard = (isset($options['multipleKeyboard']) && !empty($options['multipleKeyboard'])) ? $options['multipleKeyboard'] : "false"; //{NEW} Boolean: Allow keyboard navigation to affect multiple sliders. Default behavior cuts out keyboard navigation with more than one slider present.
+    $mousewheel = (isset($options['mousewheel']) && !empty($options['mousewheel'])) ? $options['mousewheel'] : "false"; //{UPDATED} Boolean: Requires jquery.mousewheel.js (https://github.com/brandonaaron/jquery-mousewheel) - Allows slider navigating via mousewheel
+    $pausePlay = (isset($options['pausePlay']) && !empty($options['pausePlay'])) ? $options['pausePlay'] : "false"; //Boolean: Create pause/play dynamic element
+    $pauseText = (isset($options['pauseText']) && !empty($options['pauseText'])) ? $options['pauseText'] : "Pause"; //String: Set the text for the "pause" pausePlay item
+    $playText = (isset($options['playText']) && !empty($options['playText'])) ? $options['playText'] : "Play"; //String: Set the text for the "play" pausePlay item
 
     // Special properties
-    $controlsContainer = (isset($options['controlsContainer']) && !empty($options['controlsContainer'])) ? $options['controlsContainer'] : "";//{UPDATED} jQuery Object/Selector: Declare which container the navigation elements should be appended too. Default container is the FlexSlider element. Example use would be $(".flexslider-container"). Property is ignored if given element is not found.
-    $manualControls = (isset($options['manualControls']) && !empty($options['manualControls'])) ? $options['manualControls'] : "";//{UPDATED} jQuery Object/Selector: Declare custom control navigation. Examples would be $(".flex-control-nav li") or "#tabs-nav li img", etc. The number of elements in your controlNav should match the number of slides/tabs.
-    $sync = (isset($options['sync']) && !empty($options['sync'])) ? $options['sync'] : "";//{NEW} Selector: Mirror the actions performed on this slider with another slider. Use with care.
-    $asNavFor = (isset($options['asNavFor']) && !empty($options['asNavFor'])) ? $options['asNavFor'] : "";//{NEW} Selector: Internal property exposed for turning the slider into a thumbnail navigation for another slider
+    $controlsContainer = (isset($options['controlsContainer']) && !empty($options['controlsContainer'])) ? $options['controlsContainer'] : ""; //{UPDATED} jQuery Object/Selector: Declare which container the navigation elements should be appended too. Default container is the FlexSlider element. Example use would be $(".flexslider-container"). Property is ignored if given element is not found.
+    $manualControls = (isset($options['manualControls']) && !empty($options['manualControls'])) ? $options['manualControls'] : ""; //{UPDATED} jQuery Object/Selector: Declare custom control navigation. Examples would be $(".flex-control-nav li") or "#tabs-nav li img", etc. The number of elements in your controlNav should match the number of slides/tabs.
+    $sync = (isset($options['sync']) && !empty($options['sync'])) ? $options['sync'] : ""; //{NEW} Selector: Mirror the actions performed on this slider with another slider. Use with care.
+    $asNavFor = (isset($options['asNavFor']) && !empty($options['asNavFor'])) ? $options['asNavFor'] : ""; //{NEW} Selector: Internal property exposed for turning the slider into a thumbnail navigation for another slider
 
     // Carousel Options
-    $itemWidth = (isset($options['itemWidth']) && !empty($options['itemWidth'])) ? $options['itemWidth'] : 0;//{NEW} Integer: Box-model width of individual carousel items, including horizontal borders and padding.
-    $itemMargin = (isset($options['itemMargin']) && !empty($options['itemMargin'])) ? $options['itemMargin'] : 1;//{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
-    $minItems = (isset($options['minItems']) && !empty($options['minItems'])) ? $options['minItems'] : 1;//{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
-    $maxItems = (isset($options['maxItems']) && !empty($options['maxItems'])) ? $options['maxItems'] : 0;//{NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
-    $allowOneSlide = (isset($options['allowOneSlide']) && !empty($options['allowOneSlide'])) ? $options['allowOneSlide'] : "true";//{NEW} Boolean: Whether or not to allow a slider comprised of a single slide
+    $itemWidth = (isset($options['itemWidth']) && !empty($options['itemWidth'])) ? $options['itemWidth'] : 0; //{NEW} Integer: Box-model width of individual carousel items, including horizontal borders and padding.
+    $itemMargin = (isset($options['itemMargin']) && !empty($options['itemMargin'])) ? $options['itemMargin'] : 1; //{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
+    $minItems = (isset($options['minItems']) && !empty($options['minItems'])) ? $options['minItems'] : 1; //{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
+    $maxItems = (isset($options['maxItems']) && !empty($options['maxItems'])) ? $options['maxItems'] : 0; //{NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
+    $allowOneSlide = (isset($options['allowOneSlide']) && !empty($options['allowOneSlide'])) ? $options['allowOneSlide'] : "true"; //{NEW} Boolean: Whether or not to allow a slider comprised of a single slide
     $move = (isset($options['num_items_slide']) && !empty($options['num_items_slide'])) ? $options['num_items_slide'] : 0;
 
 
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 3,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/flexslider.css', array('group' => CSS_THEME + 3, 'type' => 'file'));
 //    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/FlexSlider/flexslider-2.0.css', array('group' => CSS_THEME + 3,'type' => 'file'));
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/FlexSlider/flex-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/flex-custom.css', array('group' => CSS_THEME + 4, 'type' => 'file'));
 //    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider-2.0.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     $inline_js = 'jQuery.noConflict()(function ($) {' . "\n";
     $inline_js .= '$(window).load(function() {' . "\n";
-    $inline_js .= '    $(\'.'.$options['slider_id'].'\').flexslider({
-                                                        namespace: "'.$namespace.'",
-                                                        selector: "'.$selector.'",
-                                                        animation: "'.$animation.'",
-                                                        easing: "'.$easing.'",
-                                                        direction: "'.$direction.'",
-                                                        reverse: '.$reverse.',
-                                                        animationLoop: '.$animationLoop.',
-                                                        smoothHeight: '.$smoothHeight.',
-                                                        startAt: '.$startAt.',
-                                                        slideshow: '.$slideshow.',
-                                                        slideshowSpeed: '.$slideshowSpeed.',
-                                                        animationSpeed: '.$animationSpeed.',
-                                                        initDelay: '.$initDelay.',
-                                                        randomize: '.$randomize.',
-                                                        fadeFirstSlide: '.$fadeFirstSlide.',
-                                                        thumbCaptions: '.$thumbCaptions.',
-                                                        slideshowSpeed: '.$slideshowSpeed.',
-                                                        pauseOnAction: '.$pauseOnAction.',
-                                                        pauseOnHover: '.$pauseOnHover.',
-                                                        pauseInvisible: '.$pauseInvisible.',
-                                                        useCSS: '.$useCSS.',
-                                                        touch: '.$touch.',
-                                                        video: '.$video.',
-                                                        controlNav: '.$controlNav.',
-                                                        directionNav: '.$directionNav.',
-                                                        prevText: "'.$prevText.'",
-                                                        nextText: "'.$nextText.'",
-                                                        keyboard: '.$keyboard.',
-                                                        multipleKeyboard: '.$multipleKeyboard.',
-                                                        mousewheel: '.$mousewheel.',
-                                                        pausePlay: '.$pausePlay.',
-                                                        pauseText: "'.$pauseText.'",
-                                                        playText: "'.$playText.'",
-                                                        controlsContainer: "'.$controlsContainer.'",
-                                                        manualControls: "'.$manualControls.'",
-                                                        sync: "'.$sync.'",
-                                                        asNavFor: "'.$asNavFor.'",
-                                                        itemWidth: '.$itemWidth.',
-                                                        itemMargin: '.$itemMargin.',
-                                                        minItems: '.$minItems.',
-                                                        maxItems: '.$maxItems.',
-                                                        allowOneSlide: '.$allowOneSlide.',
-                                                        move: '.$move.',
+    $inline_js .= '    $(\'.' . $options['slider_id'] . '\').flexslider({
+                                                        namespace: "' . $namespace . '",
+                                                        selector: "' . $selector . '",
+                                                        animation: "' . $animation . '",
+                                                        easing: "' . $easing . '",
+                                                        direction: "' . $direction . '",
+                                                        reverse: ' . $reverse . ',
+                                                        animationLoop: ' . $animationLoop . ',
+                                                        smoothHeight: ' . $smoothHeight . ',
+                                                        startAt: ' . $startAt . ',
+                                                        slideshow: ' . $slideshow . ',
+                                                        slideshowSpeed: ' . $slideshowSpeed . ',
+                                                        animationSpeed: ' . $animationSpeed . ',
+                                                        initDelay: ' . $initDelay . ',
+                                                        randomize: ' . $randomize . ',
+                                                        fadeFirstSlide: ' . $fadeFirstSlide . ',
+                                                        thumbCaptions: ' . $thumbCaptions . ',
+                                                        slideshowSpeed: ' . $slideshowSpeed . ',
+                                                        pauseOnAction: ' . $pauseOnAction . ',
+                                                        pauseOnHover: ' . $pauseOnHover . ',
+                                                        pauseInvisible: ' . $pauseInvisible . ',
+                                                        useCSS: ' . $useCSS . ',
+                                                        touch: ' . $touch . ',
+                                                        video: ' . $video . ',
+                                                        controlNav: ' . $controlNav . ',
+                                                        directionNav: ' . $directionNav . ',
+                                                        prevText: "' . $prevText . '",
+                                                        nextText: "' . $nextText . '",
+                                                        keyboard: ' . $keyboard . ',
+                                                        multipleKeyboard: ' . $multipleKeyboard . ',
+                                                        mousewheel: ' . $mousewheel . ',
+                                                        pausePlay: ' . $pausePlay . ',
+                                                        pauseText: "' . $pauseText . '",
+                                                        playText: "' . $playText . '",
+                                                        controlsContainer: "' . $controlsContainer . '",
+                                                        manualControls: "' . $manualControls . '",
+                                                        sync: "' . $sync . '",
+                                                        asNavFor: "' . $asNavFor . '",
+                                                        itemWidth: ' . $itemWidth . ',
+                                                        itemMargin: ' . $itemMargin . ',
+                                                        minItems: ' . $minItems . ',
+                                                        maxItems: ' . $maxItems . ',
+                                                        allowOneSlide: ' . $allowOneSlide . ',
+                                                        move: ' . $move . ',
                                                         });' . "\n";
     $inline_js .= '});' . "\n";
     $inline_js .= '});' . "\n";
@@ -712,7 +718,7 @@ function import_flex_slider(&$vars, $options = array()){
 }
 
 /*******
-*
+ *
  *
  *
  * @param: options
@@ -783,9 +789,10 @@ dottedOverlay:"none",					//twoxtwo, threexthree, twoxtwowhite, threexthreewhite
 forceFullWidth:"off"						// Force The FullWidth
  *
  *
-*
-*/
-function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
+ *
+ */
+function import_rev_slider(&$vars, $slider_id = 'banner', $options = array())
+{
     $slider_tapi = array();
     $inner = array();
     $outer = array();
@@ -795,55 +802,55 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
     $inner[] = (isset($options['inner']) && !empty($options['inner'])) ? $options['inner'] : '';
 
 
-    if(isset($options['type']) && $options['type'] == 'banner'){
+    if (isset($options['type']) && $options['type'] == 'banner') {
         $inner[] = 'fullwidthabanner';
 //        $inner[] = 'banner_container';
 //        $inner[] = 'rev_slider';
         $outer[] = 'fullwidthbanner-container';
 //        $outer[] = 'banner_container';
 //        $outer[] = 'rev_slider_wrapper';
-        $slider_tapi['style'] .= (isset($options['float_direction']) && !empty($options['float_direction'])) ? 'float:'.$options['float_direction'].';' : 'float: left;' ;
-        $slider_tapi['style'] .= (isset($options['width']) && !empty($options['width'])) ? 'width:'.$options['width'].';' : '' ;
-        $slider_tapi['style'] .= (isset($options['height']) && !empty($options['height'])) ? 'height:'.$options['height'].';' : '' ;
-    }else{
-        $outer[] = 'fullscreen-container';//full screen
+        $slider_tapi['style'] .= (isset($options['float_direction']) && !empty($options['float_direction'])) ? 'float:' . $options['float_direction'] . ';' : 'float: left;';
+        $slider_tapi['style'] .= (isset($options['width']) && !empty($options['width'])) ? 'width:' . $options['width'] . ';' : '';
+        $slider_tapi['style'] .= (isset($options['height']) && !empty($options['height'])) ? 'height:' . $options['height'] . ';' : '';
+    } else {
+        $outer[] = 'fullscreen-container'; //full screen
     }
     $outer[] = (isset($options['outer']) && !empty($options['outer'])) ? $options['outer'] : '';
     //slider configurations
-    $delay = (isset($options['delay']) && !empty($options['delay'])) ? $options['delay'] : '7000' ;
-    $startheight = (isset($options['startheight']) && !empty($options['startheight'])) ? $options['startheight'] : '490' ;
-    $startwidth = (isset($options['startwidth']) && !empty($options['startwidth'])) ? $options['startwidth'] : '890' ;
-    $fullScreenAlignForce = (isset($options['fullScreenAlignForce']) && !empty($options['fullScreenAlignForce'])) ? $options['fullScreenAlignForce'] : 'off' ;
-    $autoHeight = (isset($options['autoHeight']) && !empty($options['autoHeight'])) ? $options['autoHeight'] : 'off' ;
-    $hideThumbs = (isset($options['hideThumbs']) && !empty($options['hideThumbs'])) ? $options['hideThumbs'] : '200' ;
-    $thumbWidth = (isset($options['thumbWidth']) && !empty($options['thumbWidth'])) ? $options['thumbWidth'] : '100' ;
-    $thumbHeight = (isset($options['thumbHeight']) && !empty($options['thumbHeight'])) ? $options['thumbHeight'] : '50' ;
-    $thumbAmount = (isset($options['thumbAmount']) && !empty($options['thumbAmount'])) ? $options['thumbAmount'] : '2' ;
+    $delay = (isset($options['delay']) && !empty($options['delay'])) ? $options['delay'] : '7000';
+    $startheight = (isset($options['startheight']) && !empty($options['startheight'])) ? $options['startheight'] : '490';
+    $startwidth = (isset($options['startwidth']) && !empty($options['startwidth'])) ? $options['startwidth'] : '890';
+    $fullScreenAlignForce = (isset($options['fullScreenAlignForce']) && !empty($options['fullScreenAlignForce'])) ? $options['fullScreenAlignForce'] : 'off';
+    $autoHeight = (isset($options['autoHeight']) && !empty($options['autoHeight'])) ? $options['autoHeight'] : 'off';
+    $hideThumbs = (isset($options['hideThumbs']) && !empty($options['hideThumbs'])) ? $options['hideThumbs'] : '200';
+    $thumbWidth = (isset($options['thumbWidth']) && !empty($options['thumbWidth'])) ? $options['thumbWidth'] : '100';
+    $thumbHeight = (isset($options['thumbHeight']) && !empty($options['thumbHeight'])) ? $options['thumbHeight'] : '50';
+    $thumbAmount = (isset($options['thumbAmount']) && !empty($options['thumbAmount'])) ? $options['thumbAmount'] : '2';
 
-    $navigationType = (isset($options['navigationType']) && !empty($options['navigationType'])) ? $options['navigationType'] : 'none' ;
-    $navigationArrows = (isset($options['navigationArrows']) && !empty($options['navigationArrows'])) ? $options['navigationArrows'] : 'nextto' ;
-    $navigationStyle = (isset($options['navigationStyle']) && !empty($options['navigationStyle'])) ? $options['navigationStyle'] : 'navbar' ;
+    $navigationType = (isset($options['navigationType']) && !empty($options['navigationType'])) ? $options['navigationType'] : 'none';
+    $navigationArrows = (isset($options['navigationArrows']) && !empty($options['navigationArrows'])) ? $options['navigationArrows'] : 'nextto';
+    $navigationStyle = (isset($options['navigationStyle']) && !empty($options['navigationStyle'])) ? $options['navigationStyle'] : 'navbar';
 
-    $navigationHAlign = (isset($options['navigationHAlign']) && !empty($options['navigationHAlign'])) ? $options['navigationHAlign'] : 'left' ;
-    $navigationVAlign = (isset($options['navigationVAlign']) && !empty($options['navigationVAlign'])) ? $options['navigationVAlign'] : 'bottom' ;
-    $navigationHOffset = (isset($options['navigationHOffset']) && !empty($options['navigationHOffset'])) ? $options['navigationHOffset'] : '0' ;
-    $navigationVOffset = (isset($options['navigationVOffset']) && !empty($options['navigationVOffset'])) ? $options['navigationVOffset'] : '20' ;
+    $navigationHAlign = (isset($options['navigationHAlign']) && !empty($options['navigationHAlign'])) ? $options['navigationHAlign'] : 'left';
+    $navigationVAlign = (isset($options['navigationVAlign']) && !empty($options['navigationVAlign'])) ? $options['navigationVAlign'] : 'bottom';
+    $navigationHOffset = (isset($options['navigationHOffset']) && !empty($options['navigationHOffset'])) ? $options['navigationHOffset'] : '0';
+    $navigationVOffset = (isset($options['navigationVOffset']) && !empty($options['navigationVOffset'])) ? $options['navigationVOffset'] : '20';
 
-    $soloArrowLeftHalign = (isset($options['soloArrowLeftHalign']) && !empty($options['soloArrowLeftHalign'])) ? $options['soloArrowLeftHalign'] : 'left' ;
-    $soloArrowLeftValign = (isset($options['soloArrowLeftValign']) && !empty($options['soloArrowLeftValign'])) ? $options['soloArrowLeftValign'] : 'bottom' ;
-    $soloArrowLeftHOffset = (isset($options['soloArrowLeftHOffset']) && !empty($options['soloArrowLeftHOffset'])) ? $options['soloArrowLeftHOffset'] : '0' ;
-    $soloArrowLeftVOffset = (isset($options['soloArrowLeftVOffset']) && !empty($options['soloArrowLeftVOffset'])) ? $options['soloArrowLeftVOffset'] : '0' ;
+    $soloArrowLeftHalign = (isset($options['soloArrowLeftHalign']) && !empty($options['soloArrowLeftHalign'])) ? $options['soloArrowLeftHalign'] : 'left';
+    $soloArrowLeftValign = (isset($options['soloArrowLeftValign']) && !empty($options['soloArrowLeftValign'])) ? $options['soloArrowLeftValign'] : 'bottom';
+    $soloArrowLeftHOffset = (isset($options['soloArrowLeftHOffset']) && !empty($options['soloArrowLeftHOffset'])) ? $options['soloArrowLeftHOffset'] : '0';
+    $soloArrowLeftVOffset = (isset($options['soloArrowLeftVOffset']) && !empty($options['soloArrowLeftVOffset'])) ? $options['soloArrowLeftVOffset'] : '0';
 
-    $soloArrowRightHalign = (isset($options['soloArrowRightHalign']) && !empty($options['soloArrowRightHalign'])) ? $options['soloArrowRightHalign'] : 'right' ;
-    $soloArrowRightValign = (isset($options['soloArrowRightValign']) && !empty($options['soloArrowRightValign'])) ? $options['soloArrowRightValign'] : 'bottom' ;
-    $soloArrowRightHOffset = (isset($options['soloArrowRightHOffset']) && !empty($options['soloArrowRightHOffset'])) ? $options['soloArrowRightHOffset'] : '0' ;
-    $soloArrowRightVOffset = (isset($options['soloArrowRightVOffset']) && !empty($options['soloArrowRightVOffset'])) ? $options['soloArrowRightVOffset'] : '0' ;
+    $soloArrowRightHalign = (isset($options['soloArrowRightHalign']) && !empty($options['soloArrowRightHalign'])) ? $options['soloArrowRightHalign'] : 'right';
+    $soloArrowRightValign = (isset($options['soloArrowRightValign']) && !empty($options['soloArrowRightValign'])) ? $options['soloArrowRightValign'] : 'bottom';
+    $soloArrowRightHOffset = (isset($options['soloArrowRightHOffset']) && !empty($options['soloArrowRightHOffset'])) ? $options['soloArrowRightHOffset'] : '0';
+    $soloArrowRightVOffset = (isset($options['soloArrowRightVOffset']) && !empty($options['soloArrowRightVOffset'])) ? $options['soloArrowRightVOffset'] : '0';
 
-    $touchenabled = (isset($options['touchenabled']) && !empty($options['touchenabled'])) ? $options['touchenabled'] : 'on' ;
-    $onHoverStop = (isset($options['onHoverStop']) && !empty($options['onHoverStop'])) ? $options['onHoverStop'] : 'on' ;
+    $touchenabled = (isset($options['touchenabled']) && !empty($options['touchenabled'])) ? $options['touchenabled'] : 'on';
+    $onHoverStop = (isset($options['onHoverStop']) && !empty($options['onHoverStop'])) ? $options['onHoverStop'] : 'on';
 
-    $shadow = (isset($options['shadow']) && !empty($options['shadow'])) ? $options['shadow'] : '1' ;
-    $fullWidth = (isset($options['fullWidth']) && !empty($options['fullWidth'])) ? $options['fullWidth'] : 'off' ;
+    $shadow = (isset($options['shadow']) && !empty($options['shadow'])) ? $options['shadow'] : '1';
+    $fullWidth = (isset($options['fullWidth']) && !empty($options['fullWidth'])) ? $options['fullWidth'] : 'off';
 
 
     //process class values
@@ -851,10 +858,10 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
     $slider_tapi['inner'] = implode(' ', $inner);
     $vars['slider_tapi'] = $slider_tapi;
 
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib')  .'/libs/rev_slider/css/rev_slider_settings.css', array('group' => CSS_THEME + 3,'type' => 'file'));
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/dynamic-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/static-captions.css', array('group' => CSS_THEME + 4,'type' => 'file'));
-    drupal_add_css(drupal_get_path('module', 'designssquare_lib') .'/libs/rev_slider/css/rev_slider-custom.css', array('group' => CSS_THEME + 4,'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/css/rev_slider_settings.css', array('group' => CSS_THEME + 3, 'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/css/dynamic-captions.css', array('group' => CSS_THEME + 4, 'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/css/static-captions.css', array('group' => CSS_THEME + 4, 'type' => 'file'));
+    drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/css/rev_slider-custom.css', array('group' => CSS_THEME + 4, 'type' => 'file'));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.plugins.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
     drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/jquery.themepunch.revolution.min.js', array('scope' => 'header', 'type' => 'file', 'weight' => 5));
 //    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/js/fix.rev.slider.js', array('scope' => 'footer', 'type' => 'file', 'weight' => 5));
@@ -863,38 +870,38 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array()){
     $inline_js .= 'tpj.noConflict();' . "\n";
     $inline_js .= '    if (tpj.fn.cssOriginal!=undefined){' . "\n";
     $inline_js .= '       tpj.fn.css = tpj.fn.cssOriginal;}' . "\n";
-    $inline_js .= '    tpj(\'.'.$slider_id.'\').revolution({' . "\n";
-    $inline_js .= '         delay:'.$delay.',' . "\n";
-    $inline_js .= '         startheight:'.$startheight.',' . "\n";
-    $inline_js .= '         startwidth:'.$startwidth.',' . "\n";
-    $inline_js .= '         fullScreenAlignForce:"'.$fullScreenAlignForce.'",' . "\n";
-    $inline_js .= '         autoHeight:"'.$autoHeight.'",' . "\n";
-    $inline_js .= '         hideThumbs:'.$hideThumbs.',' . "\n";
-    $inline_js .= '         thumbWidth:'.$thumbWidth.',' . "\n";
-    $inline_js .= '         thumbHeight:'.$thumbHeight.',' . "\n";
-    $inline_js .= '         thumbAmount:'.$thumbAmount.',' . "\n";
-    $inline_js .= '         navigationType:"'.$navigationType.'",' . "\n";
-    $inline_js .= '         navigationArrows:"'.$navigationArrows.'",' . "\n";
-    $inline_js .= '         navigationStyle:"'.$navigationStyle.'",' . "\n";
-    $inline_js .= '         touchenabled:"'.$touchenabled.'",' . "\n";
-    $inline_js .= '         onHoverStop:"'.$onHoverStop.'",' . "\n";
-    $inline_js .= '         navigationHAlign:"'.$navigationHAlign.'",' . "\n";
-    $inline_js .= '         navigationVAlign:"'.$navigationVAlign.'",' . "\n";
-    $inline_js .= '         navigationHOffset:"'.$navigationHOffset.'",' . "\n";
-    $inline_js .= '         navigationVOffset:"'.$navigationVOffset.'",' . "\n";
+    $inline_js .= '    tpj(\'.' . $slider_id . '\').revolution({' . "\n";
+    $inline_js .= '         delay:' . $delay . ',' . "\n";
+    $inline_js .= '         startheight:' . $startheight . ',' . "\n";
+    $inline_js .= '         startwidth:' . $startwidth . ',' . "\n";
+    $inline_js .= '         fullScreenAlignForce:"' . $fullScreenAlignForce . '",' . "\n";
+    $inline_js .= '         autoHeight:"' . $autoHeight . '",' . "\n";
+    $inline_js .= '         hideThumbs:' . $hideThumbs . ',' . "\n";
+    $inline_js .= '         thumbWidth:' . $thumbWidth . ',' . "\n";
+    $inline_js .= '         thumbHeight:' . $thumbHeight . ',' . "\n";
+    $inline_js .= '         thumbAmount:' . $thumbAmount . ',' . "\n";
+    $inline_js .= '         navigationType:"' . $navigationType . '",' . "\n";
+    $inline_js .= '         navigationArrows:"' . $navigationArrows . '",' . "\n";
+    $inline_js .= '         navigationStyle:"' . $navigationStyle . '",' . "\n";
+    $inline_js .= '         touchenabled:"' . $touchenabled . '",' . "\n";
+    $inline_js .= '         onHoverStop:"' . $onHoverStop . '",' . "\n";
+    $inline_js .= '         navigationHAlign:"' . $navigationHAlign . '",' . "\n";
+    $inline_js .= '         navigationVAlign:"' . $navigationVAlign . '",' . "\n";
+    $inline_js .= '         navigationHOffset:"' . $navigationHOffset . '",' . "\n";
+    $inline_js .= '         navigationVOffset:"' . $navigationVOffset . '",' . "\n";
 
-    $inline_js .= '         soloArrowLeftHalign:"'.$soloArrowLeftHalign.'",' . "\n";
-    $inline_js .= '         soloArrowLeftValign:"'.$soloArrowLeftValign.'",' . "\n";
-    $inline_js .= '         soloArrowLeftHOffset:"'.$soloArrowLeftHOffset.'",' . "\n";
-    $inline_js .= '         soloArrowLeftVOffset:"'.$soloArrowLeftVOffset.'",' . "\n";
+    $inline_js .= '         soloArrowLeftHalign:"' . $soloArrowLeftHalign . '",' . "\n";
+    $inline_js .= '         soloArrowLeftValign:"' . $soloArrowLeftValign . '",' . "\n";
+    $inline_js .= '         soloArrowLeftHOffset:"' . $soloArrowLeftHOffset . '",' . "\n";
+    $inline_js .= '         soloArrowLeftVOffset:"' . $soloArrowLeftVOffset . '",' . "\n";
 
-    $inline_js .= '         soloArrowRightHalign:"'.$soloArrowRightHalign.'",' . "\n";
-    $inline_js .= '         soloArrowRightValign:"'.$soloArrowRightValign.'",' . "\n";
-    $inline_js .= '         soloArrowRightHOffset:"'.$soloArrowRightHOffset.'",' . "\n";
-    $inline_js .= '         soloArrowRightVOffset:"'.$soloArrowRightVOffset.'",' . "\n";
+    $inline_js .= '         soloArrowRightHalign:"' . $soloArrowRightHalign . '",' . "\n";
+    $inline_js .= '         soloArrowRightValign:"' . $soloArrowRightValign . '",' . "\n";
+    $inline_js .= '         soloArrowRightHOffset:"' . $soloArrowRightHOffset . '",' . "\n";
+    $inline_js .= '         soloArrowRightVOffset:"' . $soloArrowRightVOffset . '",' . "\n";
 
-    $inline_js .= '         shadow:'.$shadow.',' . "\n";
-    $inline_js .= '         fullWidth:"'.$fullWidth.'"' . "\n";
+    $inline_js .= '         shadow:' . $shadow . ',' . "\n";
+    $inline_js .= '         fullWidth:"' . $fullWidth . '"' . "\n";
     $inline_js .= '});' . "\n";
     drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 6));
 }
@@ -959,18 +966,19 @@ function transfer_asset($asset, $mod_name, $type)
  *
  *@return: array of altered content
 */
-function get_block_context($block_id){
+function get_block_context($block_id)
+{
     $context = array();
 
     //defaults
-    $context['classes'] = '';//final list of classes
-    $context['classes_array'] = array();//array of each class before combined into one string
+    $context['classes'] = ''; //final list of classes
+    $context['classes_array'] = array(); //array of each class before combined into one string
     $context['classes_array'][] = 'contextual-links-region';
 
     drupal_alter('ds_block_context', $context, $block_id);
 
     //preprocess
-    $context['classes'] = implode(' ', $context['classes_array'] );
+    $context['classes'] = implode(' ', $context['classes_array']);
     return $context;
 }
 
@@ -979,18 +987,18 @@ function get_block_context($block_id){
  *
  * @param $hook
  *   hook name (i.e. preprocess_page, preprocess_block)
-
  * @return
  *   list of hook functions in format of module_hook
  */
-function module_preprocessors($hook){
+function module_preprocessors($hook)
+{
     $preprocessors = array();
 
     //retrieve all modules with the hook - preprocess_page
     $modules = module_list();
-    foreach($modules as $module){
+    foreach ($modules as $module) {
         if (module_hook($module, $hook)) {
-            $preprocessors[] = $module.'_'.$hook;
+            $preprocessors[] = $module . '_' . $hook;
         }
     }
 
@@ -998,7 +1006,8 @@ function module_preprocessors($hook){
 }
 
 
-function designssquare_lib_init(){
+function designssquare_lib_init()
+{
     //load for processing file_managed on Ajax calls(i.e. upload, remove)
     module_load_include('inc', 'designssquare_lib', 'inc/file_managed_alter');
 }
@@ -1013,66 +1022,73 @@ function designssquare_lib_init(){
  *          'title'
  *          'url'
  */
-function get_menu_links($name){
+function get_menu_links($name)
+{
     $mainMenuArray = menu_load_links($name);
     $finalMainMenu = array();
-    foreach($mainMenuArray as $key=> $menuItem){
+    foreach ($mainMenuArray as $key => $menuItem) {
         $finalMainMenu[$key]['active'] = false;
         $linkPath = $menuItem['link_path'];
         $linkPathAlias = drupal_get_path_alias($linkPath);
         $current_path = $_GET['q'];
 //        $currentId = $vars['node']->nid;
 //        if(drupal_get_path_alias("node/$currentId") == $linkPathAlias)$finalMainMenu[$key]['active'] = true;
-        if(drupal_get_path_alias($current_path) == $linkPathAlias){$finalMainMenu[$key]['active'] = true;}
+        if (drupal_get_path_alias($current_path) == $linkPathAlias) {
+            $finalMainMenu[$key]['active'] = true;
+        }
         $finalMainMenu[$key]['url'] = $linkPathAlias;
         $finalMainMenu[$key]['title'] = $menuItem['link_title'];
     }
-   return $finalMainMenu;
+    return $finalMainMenu;
 }
 
 /**
  * retrieves all blocks into array with key of block delta and value the StdObject of the block
  */
-function get_all_blocks(){
-    //            $block = get_block_by_name($block_name);
-
-    $all_blocks = array();
-    $default_theme = variable_get('theme_default', 'bartik');
-//        $default_theme = $GLOBALS['theme'];
+function get_all_blocks()
+{
+    $default_theme = variable_get('theme_default', $GLOBALS['theme']);
     //retrieve context plugin as alternative for managing blocks
+    $all_blocks = array();
+    $blocks = array();
+
     $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
-    $all_regions = array_diff_key(system_region_list($default_theme), array('dashboard_main' =>'','dashboard_sidebar'=>'','dashboard_inactive'=>''));
-    foreach ($all_regions as $region_key => $region_name) {
-        $ctx_blocks = array();
-        $blocks = array();
-        if (block_get_blocks_by_region($region_key)) {
-            $blocks = block_get_blocks_by_region($region_key);
-            unset($blocks['#sorted']);
+    if (!empty($ctx_plugin)) {
+        $contexts = context_active_contexts();
+        foreach ($contexts as $context) {
+            $options = $ctx_plugin->fetch_from_context($context);
+            if (!empty($options['blocks'])) {
+                $all_blocks = array_merge($all_blocks, $options['blocks']);
+            }
         }
-
-        if (!empty($ctx_plugin) && ($region_key !== 'content')) {
-            //load blocks to cache them to avoid error
-//                    $list = $ctx_plugin->block_list($region_key);
-//                    _block_render_blocks($list);
-
-            //blocks not build in html scope, so we build it manually
-            $ctx_blocks = $ctx_plugin->block_list($region_key);
-//            $ctx_blocks = _block_get_renderable_array(_block_render_blocks($region_blocks));
-        }
-        $all_blocks = array_merge($all_blocks, $blocks, $ctx_blocks);
     }
 
-    //add blocks not assigned to no region
+    //get all blocks
+    $query = db_select('block', 'b');
+    $result = $query
+        ->fields('b')
+        ->condition('b.theme', $default_theme)
+        ->condition('b.status', 1)
+        ->orderBy('b.region')
+        ->orderBy('b.weight')
+        ->orderBy('b.module')
+        ->addTag('block_load')
+        ->addTag('translatable')
+        ->execute();
+    $blocks = $result->fetchAllAssoc('bid');
+    $all_blocks = array_merge($all_blocks, $blocks);
 
+    //add blocks not assigned to no region
     return _format_block_list($all_blocks);
 }
 
-function _format_block_list($blocks){
+function _format_block_list($blocks)
+{
     $final_list = array();
-    foreach($blocks as $block){
-        if(is_array($block)){
+    foreach ($blocks as $block) {
+        if (is_array($block)) {
             $final_list[$block['#block']->delta] = $block['#block'];
-        }else{
+        } else {
             $final_list[$block->delta] = $block;
         }
     }
