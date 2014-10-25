@@ -17,10 +17,14 @@ function designssquare_lib_form_alter(&$form, &$form_state, $form_id)
 /*********Functionality********/
 function designssquare_lib_js_alter(&$javascript)
 {
+    $is_base = false;
+    $base_checked = false;
 //    global $conf;
     if (module_exists('jquery_update') && version_compare(variable_get('jquery_update_jquery_version', 0), 1.7, '>=')) {
         //use jquery_updates ui libraries instead the drupal core
         foreach ($javascript as $key => $js_path) {
+            _check_base($js_path['data'], $is_base);
+
             $token_path = explode("/", $key);
             $current_js_lib = $token_path[count($token_path) - 1];
 
@@ -33,10 +37,40 @@ function designssquare_lib_js_alter(&$javascript)
                 $data['weight'] = $js_path['weight'] + 0.01;
                 $javascript[$new_path] = $data;
             }
+
+        }
+        $base_checked = true;
+    }
+
+    if(!$base_checked){
+        foreach($javascript as $key => $js_path){
+            _check_base($js_path['data'],$is_base);
         }
     }
+
+    if($is_base){
+        //add BASE_URL declaration
+        $javascript[] = array(
+            'scope' => "header",
+            'type' => "inline",
+            'weight' => "0.021",
+            'group' => "0",
+            'every_page' => false,
+            'defer' => false,
+            'preprocess' => true,
+            'version' => null,
+            'data' => 'window.BASE_URL="/";'
+        );
+    }
+
 }
 
+function _check_base($data,&$status){
+    if(!is_array($data) && preg_match('/BASE_URL/',$data)){
+        //virtual hosty module is present
+        $status = true;
+    }
+}
 /**
  * Replaces Drupal jquery with another jquery version
  * @param $javascript
@@ -1087,10 +1121,27 @@ function _format_block_list($blocks)
     $final_list = array();
     foreach ($blocks as $block) {
         if (is_array($block)) {
-            $final_list[$block['#block']->delta] = $block['#block'];
+            if(!isset($block['#block'])){
+                $block_obj = block_load($block['module'],$block['delta']);
+                $block_obj->region = $block['region'];
+                $final_list[$block['delta']] = $block_obj;
+            }else{
+                $final_list[$block['#block']->delta] = $block['#block'];
+            }
         } else {
             $final_list[$block->delta] = $block;
         }
     }
     return $final_list;
+}
+
+/**
+ * decodes to html characters and removes all the tags
+ * @string:
+ *      string containing html tags
+ * @return
+ *      string without tags
+ */
+function removes_tags($string){
+    return strip_tags(html_entity_decode($string));
 }
