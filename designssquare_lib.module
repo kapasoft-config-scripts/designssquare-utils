@@ -48,7 +48,7 @@ function designssquare_lib_js_alter(&$javascript)
         }
     }
 
-    if($is_base){
+    if(!$is_base){
         //add BASE_URL declaration
         $javascript[] = array(
             'scope' => "header",
