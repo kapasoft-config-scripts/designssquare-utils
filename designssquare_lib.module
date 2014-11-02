@@ -229,6 +229,55 @@ function include_blocks(&$vars, $scope = 'page')
 
 function include_blocks_from_region($region_key, &$vars)
 {
+//    $all_blocks = array();
+//    //making blocks available
+//    //retrieve context plugin as alternative for managing blocks
+//    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
+////    foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
+//    if (block_get_blocks_by_region($region_key)) {
+//        $blocks = block_get_blocks_by_region($region_key);
+//    }
+//    if (!empty($ctx_plugin)) {
+//        //load blocks to cache them to avoid
+//        //Notice: Undefined property: stdClass::$content in _block_get_renderable_array() (line 337 of
+//        $list = $ctx_plugin->block_list($region_key);
+//        _block_render_blocks($list);
+//
+//        $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
+//    }
+//
+//
+//    if (isset($ctx_blocks) && isset($blocks)) {
+//        //there are blocks from the context as well from blocks module
+//        $all_blocks = array_merge($blocks, $ctx_blocks);
+//
+//        //sort the blocks merged
+//        $all_blocks['#sorted'] = FALSE;
+//
+//        //maintain weights
+//        foreach ($all_blocks as &$block) {
+//            if (isset($block['#block']->weight)) {
+//                $block['#weight'] = $block['#block']->weight;
+//            }
+//        }
+//
+//    } elseif (isset($ctx_blocks)) {
+//        $all_blocks = $ctx_blocks;
+//    } elseif (isset($blocks)) {
+//        $all_blocks = $blocks;
+//    }
+
+//    $all_blocks = get_blocks_from_region($region_key);
+    // Get the content for each region and add it to the $region variable
+    $vars['region'][$region_key] = get_blocks_from_region($region_key);
+//    }
+}
+
+/**retrieves all bocks also once managed by context_ui
+ * @param $region_key
+ *       id of the region
+ */
+function get_blocks_from_region($region_key){
     $all_blocks = array();
     //making blocks available
     //retrieve context plugin as alternative for managing blocks
@@ -245,8 +294,6 @@ function include_blocks_from_region($region_key, &$vars)
 
         $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
     }
-
-
     if (isset($ctx_blocks) && isset($blocks)) {
         //there are blocks from the context as well from blocks module
         $all_blocks = array_merge($blocks, $ctx_blocks);
@@ -267,9 +314,7 @@ function include_blocks_from_region($region_key, &$vars)
         $all_blocks = $blocks;
     }
 
-    // Get the content for each region and add it to the $region variable
-    $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
-//    }
+    return (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
 }
 
 //determines if current taxonomy term is part of commerce_product
