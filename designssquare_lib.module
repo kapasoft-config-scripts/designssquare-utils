@@ -1084,6 +1084,74 @@ function module_preprocessors($hook)
     return $preprocessors;
 }
 
+/***
+ * builds list of default theme and all modules page preprocessors including one custom specific to the theme function
+ * This is intended for building single point entry for widgets as described in blog post
+ * http://margotskapacs.com/2014/02/rendering-page-programmatically-to-create-permanent-urls-like-shop-gallery
+ * @param $theme_func_name
+ *      the name of theme function the list of hooks are assigned
+ * @param $module_name
+ *      the module name implementing theme function
+ * @return array
+ *      return an array of all theme hooks in an order of execution consistent with Drupal order
+ */
+function build_page_preprocessors($theme_func_name, $module_name){
+    $current_theme = $GLOBALS['theme'];
+
+    $prefix_processors =  array(
+        'template_preprocess',
+        'template_preprocess_page',
+        $module_name . '_preprocess_'.$theme_func_name,
+    );
+    $post_processors = array(
+        $module_name . '_preprocess_page',
+        $current_theme . '_preprocess_page',
+    );
+    $other_module_preprocessors  = module_preprocessors('preprocess_page');
+    $combined_processors  = array_merge($prefix_processors,$other_module_preprocessors,$post_processors);
+
+    return $combined_processors;
+}
+
+/***
+ * Prepares node content for rendering including set in cache, enable context,etc
+ * This is intended for building single point entry for widgets as described in blog post
+ * http://margotskapacs.com/2014/02/rendering-page-programmatically-to-create-permanent-urls-like-shop-gallery
+ * @param $node_id
+ *      the id of node
+ * @param string $context_id
+ *      the id of context ot activate
+ */
+function init_content($node_id, $context_id = 'state_wide'){
+    //load node
+    $node_to_render = node_load($node_id);
+
+    $content = node_view($node_to_render, 'full');
+
+    //this seems to be standard Drupal content setup, so to be consistent
+    $nodes = array(
+        'nodes' => array(
+            $node_to_render->nid => $content,
+            '#sorted' => true,
+        )
+    );
+
+    //set content in cache so its available for others
+    drupal_set_page_content($nodes);
+
+    //load context after content cache is set, so hook_context_load_alter receives the content
+    if(module_exists('context')){
+        //retrieve active contexts
+        $all_active_contexts  = context_active_contexts();
+        foreach($all_active_contexts as $key => $context){
+            context_set('context', $context->name, $context);
+        }
+//        context_flush_caches();
+    }else{
+        watchdog(WATCHDOG_NOTICE, 'The module - context is not present. Unable set context ');
+    }
+}
+
 
 function designssquare_lib_init()
 {
@@ -1120,6 +1188,19 @@ function get_menu_links($name)
     }
     return $finalMainMenu;
 }
+
+/****
+ * builds menu as renderable array via theme function
+ *      @input $menu_name
+ *      the id of menu to build(i.e. main-menu, user-menu)
+ *      @return
+ *      renderable array for menu
+ */
+function ds_build_menu($menu_id){
+    $menu_tree = menu_tree($menu_id);
+    return (isset($menu_tree) && !empty($menu_tree)) ? theme('menu_tree', array('element' => $menu_tree)) : '';
+}
+
 
 /**
  * retrieves all blocks into array with key of block delta and value the StdObject of the block
