@@ -42,13 +42,13 @@ function designssquare_lib_js_alter(&$javascript)
         $base_checked = true;
     }
 
-    if(!$base_checked){
-        foreach($javascript as $key => $js_path){
-            _check_base($js_path['data'],$is_base);
+    if (!$base_checked) {
+        foreach ($javascript as $key => $js_path) {
+            _check_base($js_path['data'], $is_base);
         }
     }
 
-    if(!$is_base){
+    if (!$is_base) {
         //add BASE_URL declaration
         $javascript[] = array(
             'scope' => "header",
@@ -65,12 +65,14 @@ function designssquare_lib_js_alter(&$javascript)
 
 }
 
-function _check_base($data,&$status){
-    if(!is_array($data) && preg_match('/BASE_URL=/',$data)){
+function _check_base($data, &$status)
+{
+    if (!is_array($data) && preg_match('/BASE_URL=/', $data)) {
         //virtual hosty module is present
         $status = true;
     }
 }
+
 /**
  * Replaces Drupal jquery with another jquery version
  * @param $javascript
@@ -277,7 +279,8 @@ function include_blocks_from_region($region_key, &$vars)
  * @param $region_key
  *       id of the region
  */
-function get_blocks_from_region($region_key){
+function get_blocks_from_region($region_key)
+{
     $all_blocks = array();
     //making blocks available
     //retrieve context plugin as alternative for managing blocks
@@ -313,6 +316,8 @@ function get_blocks_from_region($region_key){
     } elseif (isset($blocks)) {
         $all_blocks = $blocks;
     }
+
+    //need to be sorted
 
     return (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
 }
@@ -387,38 +392,45 @@ function move_blocks_for_sidebars(&$context, $term_id_of_sidebar)
 //@return stdClass of the Node or Null if no node set in the content cache
 function get_node_from_cache()
 {
-    //get the current content from cache
-    $content = get_content_from_cache();
+    $current_node = & drupal_static(__FUNCTION__);
 
-    //retrieve current node being loaded
+    if (!isset($current_node)) {
+        //get the current content from cache
+        $content = get_content_from_cache();
+
+        //retrieve current node being loaded
 //    $current_node = array_slice($content['system_main']['nodes'],0,1);
-    $current_node = null;
-    if ($content) {
-        //cache is set
-        $node_wrap = (isset($content['nodes'])) ? array_slice($content['nodes'], 0, 1) : null;
-        if (isset($node_wrap) && !empty($node_wrap)) {
-            $temp = array_values($node_wrap);
-            $current_node = $temp[0]['#node'];
+        $current_node = null;
+        if ($content) {
+            //cache is set
+            $node_wrap = (isset($content['nodes'])) ? array_slice($content['nodes'], 0, 1) : null;
+            if (isset($node_wrap) && !empty($node_wrap)) {
+                $temp = array_values($node_wrap);
+                $current_node = $temp[0]['#node'];
+            } else {
+                $current_node = null;
+            }
         } else {
-            $current_node = null;
-        }
-    } else {
-        //cache not set, lets try to load from path
-        if ((arg(0) == 'node') && arg(1) && is_numeric(arg(1))) {
-            $current_node = node_load(arg(1));
+            //cache not set, lets try to load from path
+            if ((arg(0) == 'node') && arg(1) && is_numeric(arg(1))) {
+                $current_node = node_load(arg(1));
+            }
         }
     }
-
     return $current_node;
 }
 
 function get_content_from_cache()
 {
-    //get the current content from cache
-    $content = drupal_set_page_content();
-    //indicate that you are not adding content but just reading it by setting static variable 'system...added' to False
-    $system_main_content_added = & drupal_static('system_main_content_added');
-    $system_main_content_added = FALSE;
+    $content = & drupal_static(__FUNCTION__);
+
+    if (!isset($content)) {
+        //get the current content from cache
+        $content = drupal_set_page_content();
+        //indicate that you are not adding content but just reading it by setting static variable 'system...added' to False
+        $system_main_content_added = & drupal_static('system_main_content_added');
+        $system_main_content_added = FALSE;
+    }
     return $content;
 }
 
@@ -454,6 +466,7 @@ function get_relative_artifact($uri, $file_name, $module)
     if (!file_exists($source)) {
         watchdog(WATCHDOG_NOTICE, 'Import ' . $module . ': Image does not exists at ' . $source);
     }
+
     return $source;
 }
 
@@ -873,6 +886,7 @@ forceFullWidth:"off"						// Force The FullWidth
 function import_rev_slider(&$vars, $slider_id = 'banner', $options = array())
 {
     $slider_tapi = array();
+    $slider_tapi['options'] = array();
     $inner = array();
     $outer = array();
     $slider_tapi['style'] = '';
@@ -896,45 +910,47 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array())
     }
     $outer[] = (isset($options['outer']) && !empty($options['outer'])) ? $options['outer'] : '';
     //slider configurations
-    $delay = (isset($options['delay']) && !empty($options['delay'])) ? $options['delay'] : '7000';
-    $startheight = (isset($options['startheight']) && !empty($options['startheight'])) ? $options['startheight'] : '490';
-    $startwidth = (isset($options['startwidth']) && !empty($options['startwidth'])) ? $options['startwidth'] : '890';
-    $fullScreenAlignForce = (isset($options['fullScreenAlignForce']) && !empty($options['fullScreenAlignForce'])) ? $options['fullScreenAlignForce'] : 'off';
-    $autoHeight = (isset($options['autoHeight']) && !empty($options['autoHeight'])) ? $options['autoHeight'] : 'off';
-    $hideThumbs = (isset($options['hideThumbs']) && !empty($options['hideThumbs'])) ? $options['hideThumbs'] : '200';
-    $thumbWidth = (isset($options['thumbWidth']) && !empty($options['thumbWidth'])) ? $options['thumbWidth'] : '100';
-    $thumbHeight = (isset($options['thumbHeight']) && !empty($options['thumbHeight'])) ? $options['thumbHeight'] : '50';
-    $thumbAmount = (isset($options['thumbAmount']) && !empty($options['thumbAmount'])) ? $options['thumbAmount'] : '2';
+    $slider_tapi['options']['delay'] = (isset($options['delay']) && !empty($options['delay'])) ? $options['delay'] : '7000';
+    $slider_tapi['options']['startheight'] = (isset($options['startheight']) && !empty($options['startheight'])) ? $options['startheight'] : '490';
+    $slider_tapi['options']['startwidth'] = (isset($options['startwidth']) && !empty($options['startwidth'])) ? $options['startwidth'] : '890';
+    $slider_tapi['options']['fullScreenAlignForce'] = (isset($options['fullScreenAlignForce']) && !empty($options['fullScreenAlignForce'])) ? $options['fullScreenAlignForce'] : 'off';
+    $slider_tapi['options']['autoHeight'] = (isset($options['autoHeight']) && !empty($options['autoHeight'])) ? $options['autoHeight'] : 'off';
+    $slider_tapi['options']['hideThumbs'] = (isset($options['hideThumbs']) && !empty($options['hideThumbs'])) ? $options['hideThumbs'] : '200';
+    $slider_tapi['options']['thumbWidth'] = (isset($options['thumbWidth']) && !empty($options['thumbWidth'])) ? $options['thumbWidth'] : '100';
+    $slider_tapi['options']['thumbHeight'] = (isset($options['thumbHeight']) && !empty($options['thumbHeight'])) ? $options['thumbHeight'] : '50';
+    $slider_tapi['options']['thumbAmount'] = (isset($options['thumbAmount']) && !empty($options['thumbAmount'])) ? $options['thumbAmount'] : '2';
 
-    $navigationType = (isset($options['navigationType']) && !empty($options['navigationType'])) ? $options['navigationType'] : 'none';
-    $navigationArrows = (isset($options['navigationArrows']) && !empty($options['navigationArrows'])) ? $options['navigationArrows'] : 'nextto';
-    $navigationStyle = (isset($options['navigationStyle']) && !empty($options['navigationStyle'])) ? $options['navigationStyle'] : 'navbar';
+    $slider_tapi['options']['navigationType'] = (isset($options['navigationType']) && !empty($options['navigationType'])) ? $options['navigationType'] : 'none';
+    $slider_tapi['options']['navigationArrows'] = (isset($options['navigationArrows']) && !empty($options['navigationArrows'])) ? $options['navigationArrows'] : 'nextto';
+    $slider_tapi['options']['navigationStyle'] = (isset($options['navigationStyle']) && !empty($options['navigationStyle'])) ? $options['navigationStyle'] : 'navbar';
 
-    $navigationHAlign = (isset($options['navigationHAlign']) && !empty($options['navigationHAlign'])) ? $options['navigationHAlign'] : 'left';
-    $navigationVAlign = (isset($options['navigationVAlign']) && !empty($options['navigationVAlign'])) ? $options['navigationVAlign'] : 'bottom';
-    $navigationHOffset = (isset($options['navigationHOffset']) && !empty($options['navigationHOffset'])) ? $options['navigationHOffset'] : '0';
-    $navigationVOffset = (isset($options['navigationVOffset']) && !empty($options['navigationVOffset'])) ? $options['navigationVOffset'] : '20';
+    $slider_tapi['options']['navigationHAlign'] = (isset($options['navigationHAlign']) && !empty($options['navigationHAlign'])) ? $options['navigationHAlign'] : 'left';
+    $slider_tapi['options']['navigationVAlign'] = (isset($options['navigationVAlign']) && !empty($options['navigationVAlign'])) ? $options['navigationVAlign'] : 'bottom';
+    $slider_tapi['options']['navigationHOffset'] = (isset($options['navigationHOffset']) && !empty($options['navigationHOffset'])) ? $options['navigationHOffset'] : '0';
+    $slider_tapi['options']['navigationVOffset'] = (isset($options['navigationVOffset']) && !empty($options['navigationVOffset'])) ? $options['navigationVOffset'] : '20';
 
-    $soloArrowLeftHalign = (isset($options['soloArrowLeftHalign']) && !empty($options['soloArrowLeftHalign'])) ? $options['soloArrowLeftHalign'] : 'left';
-    $soloArrowLeftValign = (isset($options['soloArrowLeftValign']) && !empty($options['soloArrowLeftValign'])) ? $options['soloArrowLeftValign'] : 'bottom';
-    $soloArrowLeftHOffset = (isset($options['soloArrowLeftHOffset']) && !empty($options['soloArrowLeftHOffset'])) ? $options['soloArrowLeftHOffset'] : '0';
-    $soloArrowLeftVOffset = (isset($options['soloArrowLeftVOffset']) && !empty($options['soloArrowLeftVOffset'])) ? $options['soloArrowLeftVOffset'] : '0';
+    $slider_tapi['options']['soloArrowLeftHalign'] = (isset($options['soloArrowLeftHalign']) && !empty($options['soloArrowLeftHalign'])) ? $options['soloArrowLeftHalign'] : 'left';
+    $slider_tapi['options']['soloArrowLeftValign'] = (isset($options['soloArrowLeftValign']) && !empty($options['soloArrowLeftValign'])) ? $options['soloArrowLeftValign'] : 'bottom';
+    $slider_tapi['options']['soloArrowLeftHOffset'] = (isset($options['soloArrowLeftHOffset']) && !empty($options['soloArrowLeftHOffset'])) ? $options['soloArrowLeftHOffset'] : '0';
+    $slider_tapi['options']['soloArrowLeftVOffset'] = (isset($options['soloArrowLeftVOffset']) && !empty($options['soloArrowLeftVOffset'])) ? $options['soloArrowLeftVOffset'] : '0';
 
-    $soloArrowRightHalign = (isset($options['soloArrowRightHalign']) && !empty($options['soloArrowRightHalign'])) ? $options['soloArrowRightHalign'] : 'right';
-    $soloArrowRightValign = (isset($options['soloArrowRightValign']) && !empty($options['soloArrowRightValign'])) ? $options['soloArrowRightValign'] : 'bottom';
-    $soloArrowRightHOffset = (isset($options['soloArrowRightHOffset']) && !empty($options['soloArrowRightHOffset'])) ? $options['soloArrowRightHOffset'] : '0';
-    $soloArrowRightVOffset = (isset($options['soloArrowRightVOffset']) && !empty($options['soloArrowRightVOffset'])) ? $options['soloArrowRightVOffset'] : '0';
+    $slider_tapi['options']['soloArrowRightHalign'] = (isset($options['soloArrowRightHalign']) && !empty($options['soloArrowRightHalign'])) ? $options['soloArrowRightHalign'] : 'right';
+    $slider_tapi['options']['soloArrowRightValign'] = (isset($options['soloArrowRightValign']) && !empty($options['soloArrowRightValign'])) ? $options['soloArrowRightValign'] : 'bottom';
+    $slider_tapi['options']['soloArrowRightHOffset'] = (isset($options['soloArrowRightHOffset']) && !empty($options['soloArrowRightHOffset'])) ? $options['soloArrowRightHOffset'] : '0';
+    $slider_tapi['options']['soloArrowRightVOffset'] = (isset($options['soloArrowRightVOffset']) && !empty($options['soloArrowRightVOffset'])) ? $options['soloArrowRightVOffset'] : '0';
 
-    $touchenabled = (isset($options['touchenabled']) && !empty($options['touchenabled'])) ? $options['touchenabled'] : 'on';
-    $onHoverStop = (isset($options['onHoverStop']) && !empty($options['onHoverStop'])) ? $options['onHoverStop'] : 'on';
+    $slider_tapi['options']['touchenabled'] = (isset($options['touchenabled']) && !empty($options['touchenabled'])) ? $options['touchenabled'] : 'on';
+    $slider_tapi['options']['onHoverStop'] = (isset($options['onHoverStop']) && !empty($options['onHoverStop'])) ? $options['onHoverStop'] : 'on';
 
-    $shadow = (isset($options['shadow']) && !empty($options['shadow'])) ? $options['shadow'] : '1';
-    $fullWidth = (isset($options['fullWidth']) && !empty($options['fullWidth'])) ? $options['fullWidth'] : 'off';
+    $slider_tapi['options']['shadow'] = (isset($options['shadow']) && !empty($options['shadow'])) ? $options['shadow'] : '1';
+    $slider_tapi['options']['fullWidth'] = (isset($options['fullWidth']) && !empty($options['fullWidth'])) ? $options['fullWidth'] : 'off';
 
 
     //process class values
     $slider_tapi['outer'] = implode(' ', $outer);
     $slider_tapi['inner'] = implode(' ', $inner);
+    $slider_tapi['type'] = 'rev-slider';
+    drupal_alter('slider_tapi', $slider_tapi);
     $vars['slider_tapi'] = $slider_tapi;
 
     drupal_add_css(drupal_get_path('module', 'designssquare_lib') . '/libs/rev_slider/css/rev_slider_settings.css', array('group' => CSS_THEME + 3, 'type' => 'file'));
@@ -950,37 +966,37 @@ function import_rev_slider(&$vars, $slider_id = 'banner', $options = array())
     $inline_js .= '    if (tpj.fn.cssOriginal!=undefined){' . "\n";
     $inline_js .= '       tpj.fn.css = tpj.fn.cssOriginal;}' . "\n";
     $inline_js .= '    tpj(\'.' . $slider_id . '\').revolution({' . "\n";
-    $inline_js .= '         delay:' . $delay . ',' . "\n";
-    $inline_js .= '         startheight:' . $startheight . ',' . "\n";
-    $inline_js .= '         startwidth:' . $startwidth . ',' . "\n";
-    $inline_js .= '         fullScreenAlignForce:"' . $fullScreenAlignForce . '",' . "\n";
-    $inline_js .= '         autoHeight:"' . $autoHeight . '",' . "\n";
-    $inline_js .= '         hideThumbs:' . $hideThumbs . ',' . "\n";
-    $inline_js .= '         thumbWidth:' . $thumbWidth . ',' . "\n";
-    $inline_js .= '         thumbHeight:' . $thumbHeight . ',' . "\n";
-    $inline_js .= '         thumbAmount:' . $thumbAmount . ',' . "\n";
-    $inline_js .= '         navigationType:"' . $navigationType . '",' . "\n";
-    $inline_js .= '         navigationArrows:"' . $navigationArrows . '",' . "\n";
-    $inline_js .= '         navigationStyle:"' . $navigationStyle . '",' . "\n";
-    $inline_js .= '         touchenabled:"' . $touchenabled . '",' . "\n";
-    $inline_js .= '         onHoverStop:"' . $onHoverStop . '",' . "\n";
-    $inline_js .= '         navigationHAlign:"' . $navigationHAlign . '",' . "\n";
-    $inline_js .= '         navigationVAlign:"' . $navigationVAlign . '",' . "\n";
-    $inline_js .= '         navigationHOffset:"' . $navigationHOffset . '",' . "\n";
-    $inline_js .= '         navigationVOffset:"' . $navigationVOffset . '",' . "\n";
+    $inline_js .= '         delay:' . $slider_tapi['options']['delay'] . ',' . "\n";
+    $inline_js .= '         startheight:' . $slider_tapi['options']['startheight'] . ',' . "\n";
+    $inline_js .= '         startwidth:' . $slider_tapi['options']['startwidth'] . ',' . "\n";
+    $inline_js .= '         fullScreenAlignForce:"' . $slider_tapi['options']['fullScreenAlignForce'] . '",' . "\n";
+    $inline_js .= '         autoHeight:"' . $slider_tapi['options']['autoHeight'] . '",' . "\n";
+    $inline_js .= '         hideThumbs:' . $slider_tapi['options']['hideThumbs'] . ',' . "\n";
+    $inline_js .= '         thumbWidth:' . $slider_tapi['options']['thumbWidth'] . ',' . "\n";
+    $inline_js .= '         thumbHeight:' . $slider_tapi['options']['thumbHeight'] . ',' . "\n";
+    $inline_js .= '         thumbAmount:' . $slider_tapi['options']['thumbAmount'] . ',' . "\n";
+    $inline_js .= '         navigationType:"' . $slider_tapi['options']['navigationType'] . '",' . "\n";
+    $inline_js .= '         navigationArrows:"' . $slider_tapi['options']['navigationArrows'] . '",' . "\n";
+    $inline_js .= '         navigationStyle:"' . $slider_tapi['options']['navigationStyle'] . '",' . "\n";
+    $inline_js .= '         touchenabled:"' . $slider_tapi['options']['touchenabled'] . '",' . "\n";
+    $inline_js .= '         onHoverStop:"' . $slider_tapi['options']['onHoverStop'] . '",' . "\n";
+    $inline_js .= '         navigationHAlign:"' . $slider_tapi['options']['navigationHAlign'] . '",' . "\n";
+    $inline_js .= '         navigationVAlign:"' . $slider_tapi['options']['navigationVAlign'] . '",' . "\n";
+    $inline_js .= '         navigationHOffset:"' . $slider_tapi['options']['navigationHOffset'] . '",' . "\n";
+    $inline_js .= '         navigationVOffset:"' . $slider_tapi['options']['navigationVOffset'] . '",' . "\n";
 
-    $inline_js .= '         soloArrowLeftHalign:"' . $soloArrowLeftHalign . '",' . "\n";
-    $inline_js .= '         soloArrowLeftValign:"' . $soloArrowLeftValign . '",' . "\n";
-    $inline_js .= '         soloArrowLeftHOffset:"' . $soloArrowLeftHOffset . '",' . "\n";
-    $inline_js .= '         soloArrowLeftVOffset:"' . $soloArrowLeftVOffset . '",' . "\n";
+    $inline_js .= '         soloArrowLeftHalign:"' . $slider_tapi['options']['soloArrowLeftHalign'] . '",' . "\n";
+    $inline_js .= '         soloArrowLeftValign:"' . $slider_tapi['options']['soloArrowLeftValign'] . '",' . "\n";
+    $inline_js .= '         soloArrowLeftHOffset:"' . $slider_tapi['options']['soloArrowLeftHOffset'] . '",' . "\n";
+    $inline_js .= '         soloArrowLeftVOffset:"' . $slider_tapi['options']['soloArrowLeftVOffset'] . '",' . "\n";
 
-    $inline_js .= '         soloArrowRightHalign:"' . $soloArrowRightHalign . '",' . "\n";
-    $inline_js .= '         soloArrowRightValign:"' . $soloArrowRightValign . '",' . "\n";
-    $inline_js .= '         soloArrowRightHOffset:"' . $soloArrowRightHOffset . '",' . "\n";
-    $inline_js .= '         soloArrowRightVOffset:"' . $soloArrowRightVOffset . '",' . "\n";
+    $inline_js .= '         soloArrowRightHalign:"' . $slider_tapi['options']['soloArrowRightHalign'] . '",' . "\n";
+    $inline_js .= '         soloArrowRightValign:"' . $slider_tapi['options']['soloArrowRightValign'] . '",' . "\n";
+    $inline_js .= '         soloArrowRightHOffset:"' . $slider_tapi['options']['soloArrowRightHOffset'] . '",' . "\n";
+    $inline_js .= '         soloArrowRightVOffset:"' . $slider_tapi['options']['soloArrowRightVOffset'] . '",' . "\n";
 
-    $inline_js .= '         shadow:' . $shadow . ',' . "\n";
-    $inline_js .= '         fullWidth:"' . $fullWidth . '"' . "\n";
+    $inline_js .= '         shadow:' . $slider_tapi['options']['shadow'] . ',' . "\n";
+    $inline_js .= '         fullWidth:"' . $slider_tapi['options']['fullWidth'] . '"' . "\n";
     $inline_js .= '});' . "\n";
     drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 6));
 }
@@ -1095,20 +1111,21 @@ function module_preprocessors($hook)
  * @return array
  *      return an array of all theme hooks in an order of execution consistent with Drupal order
  */
-function build_page_preprocessors($theme_func_name, $module_name){
+function build_page_preprocessors($theme_func_name, $module_name)
+{
     $current_theme = $GLOBALS['theme'];
 
-    $prefix_processors =  array(
+    $prefix_processors = array(
         'template_preprocess',
         'template_preprocess_page',
-        $module_name . '_preprocess_'.$theme_func_name,
+        $module_name . '_preprocess_' . $theme_func_name,
     );
     $post_processors = array(
         $module_name . '_preprocess_page',
         $current_theme . '_preprocess_page',
     );
-    $other_module_preprocessors  = module_preprocessors('preprocess_page');
-    $combined_processors  = array_merge($prefix_processors,$other_module_preprocessors,$post_processors);
+    $other_module_preprocessors = module_preprocessors('preprocess_page');
+    $combined_processors = array_merge($prefix_processors, $other_module_preprocessors, $post_processors);
 
     return $combined_processors;
 }
@@ -1122,10 +1139,11 @@ function build_page_preprocessors($theme_func_name, $module_name){
  * @param string $context_id
  *      the id of context ot activate
  */
-function init_content($node_id, $context_id = 'state_wide'){
+function init_content($node_id, $context_id = 'state_wide')
+{
     //load node
     $node_to_render = node_load($node_id);
-
+    $type = $node_to_render->type;
     $content = node_view($node_to_render, 'full');
 
     //this seems to be standard Drupal content setup, so to be consistent
@@ -1140,14 +1158,26 @@ function init_content($node_id, $context_id = 'state_wide'){
     drupal_set_page_content($nodes);
 
     //load context after content cache is set, so hook_context_load_alter receives the content
-    if(module_exists('context')){
-        //retrieve active contexts
-        $all_active_contexts  = context_active_contexts();
-        foreach($all_active_contexts as $key => $context){
-            context_set('context', $context->name, $context);
+    if (module_exists('context')) {
+        //activate contacts
+        $map = context_condition_map();
+        foreach ($map['node'][$type] as $key => $context_name) {
+            $context = context_load($context_name); //load certain context
+            if (isset($context) && empty($context->disabled)) {
+                context_condition_met($context, 'node');
+            }
         }
-//        context_flush_caches();
-    }else{
+//        context_init();
+//        $context_name = $map['node']['type'][0];
+        //retrieve active contexts
+//        $all_active_contexts  = context_active_contexts();
+//        $all_active_contexts = context_load(NULL, TRUE);
+//        $all_active_contexts = context_enabled_contexts();
+//        foreach($all_active_contexts as $key => $context){
+//            context_set('context', $context->name, $context);
+//        }
+        context_flush_caches();
+    } else {
         watchdog(WATCHDOG_NOTICE, 'The module - context is not present. Unable set context ');
     }
 }
@@ -1190,13 +1220,14 @@ function get_menu_links($name)
 }
 
 /****
- * builds menu as renderable array via theme function
- *      @input $menu_name
+ * builds menu links as renderable array via theme function
+ * @input $menu_name
  *      the id of menu to build(i.e. main-menu, user-menu)
- *      @return
+ * @return
  *      renderable array for menu
  */
-function ds_build_menu($menu_id){
+function ds_build_menu($menu_id)
+{
     $menu_tree = menu_tree($menu_id);
     return (isset($menu_tree) && !empty($menu_tree)) ? theme('menu_tree', array('element' => $menu_tree)) : '';
 }
@@ -1207,39 +1238,44 @@ function ds_build_menu($menu_id){
  */
 function get_all_blocks()
 {
-    $default_theme = variable_get('theme_default', $GLOBALS['theme']);
-    //retrieve context plugin as alternative for managing blocks
-    $all_blocks = array();
-    $blocks = array();
+    $final = & drupal_static(__FUNCTION__);
 
-    $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
-    if (!empty($ctx_plugin)) {
-        $contexts = context_active_contexts();
-        foreach ($contexts as $context) {
-            $options = $ctx_plugin->fetch_from_context($context);
-            if (!empty($options['blocks'])) {
-                $all_blocks = array_merge($all_blocks, $options['blocks']);
+    if (!isset($final)) {
+        $default_theme = variable_get('theme_default', $GLOBALS['theme']);
+        //retrieve context plugin as alternative for managing blocks
+        $all_blocks = array();
+        $blocks = array();
+
+        $ctx_plugin = (module_exists('context')) ? context_get_plugin('reaction', 'block') : '';
+        if (!empty($ctx_plugin)) {
+            $contexts = context_active_contexts();
+            foreach ($contexts as $context) {
+                $options = $ctx_plugin->fetch_from_context($context);
+                if (!empty($options['blocks'])) {
+                    $all_blocks = array_merge($all_blocks, $options['blocks']);
+                }
             }
         }
+
+        //get all blocks
+        $query = db_select('block', 'b');
+        $result = $query
+            ->fields('b')
+            ->condition('b.theme', $default_theme)
+            ->condition('b.status', 1)
+            ->orderBy('b.region')
+            ->orderBy('b.weight')
+            ->orderBy('b.module')
+            ->addTag('block_load')
+            ->addTag('translatable')
+            ->execute();
+        $blocks = $result->fetchAllAssoc('bid');
+        $all_blocks = array_merge($all_blocks, $blocks);
+
+        //add blocks not assigned to no region
+        $final = _format_block_list($all_blocks);
     }
-
-    //get all blocks
-    $query = db_select('block', 'b');
-    $result = $query
-        ->fields('b')
-        ->condition('b.theme', $default_theme)
-        ->condition('b.status', 1)
-        ->orderBy('b.region')
-        ->orderBy('b.weight')
-        ->orderBy('b.module')
-        ->addTag('block_load')
-        ->addTag('translatable')
-        ->execute();
-    $blocks = $result->fetchAllAssoc('bid');
-    $all_blocks = array_merge($all_blocks, $blocks);
-
-    //add blocks not assigned to no region
-    return _format_block_list($all_blocks);
+    return $final;
 }
 
 function _format_block_list($blocks)
@@ -1247,11 +1283,11 @@ function _format_block_list($blocks)
     $final_list = array();
     foreach ($blocks as $block) {
         if (is_array($block)) {
-            if(!isset($block['#block'])){
-                $block_obj = block_load($block['module'],$block['delta']);
+            if (!isset($block['#block'])) {
+                $block_obj = block_load($block['module'], $block['delta']);
                 $block_obj->region = $block['region'];
                 $final_list[$block['delta']] = $block_obj;
-            }else{
+            } else {
                 $final_list[$block['#block']->delta] = $block['#block'];
             }
         } else {
@@ -1268,6 +1304,7 @@ function _format_block_list($blocks)
  * @return
  *      string without tags
  */
-function removes_tags($string){
+function removes_tags($string)
+{
     return strip_tags(html_entity_decode($string));
 }
