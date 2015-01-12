@@ -5,7 +5,7 @@
 /**
  * retrieves and construct video output from node with particular field as parameter
  * @return
- *      video output in html
+ *      video output in rendable array
  */
 function construct_video($node, $format_name, $field_name = 'field_video_file')
 {
@@ -34,6 +34,58 @@ function construct_video($node, $format_name, $field_name = 'field_video_file')
     return $video_output;
 }
 
+/**
+ * retrieves and construct video output from node with particular field as parameter
+ * @return
+ *      video output renderable array
+ */
+function construct_videojs($file_id, $format_name = '')
+{
+    if (!module_exists('videojs')) {
+//        module_load_include('module', 'videojs');
+//        videojs_add();
+//    }else{
+        watchdog('designssquare_com_widget_gallery', 'VideoJs module is not present', NULL, WATCHDOG_ALERT);
+    }
+
+    $file = file_load($file_id);
+    if (isset($file) && !empty($file)) {
+
+        $items = array();
+        $items[] = array(
+            'uri' => $file->uri,
+            'filemime' => $file->filemime,
+        );
+        $video_settings = _videojs_settings($format_name);
+        //video file
+        $video_render_array = array(
+//            '#theme' => 'videojs_view',
+            '#theme' => 'videojs',
+            '#items' => $items,
+            '#player_id' => 'vidoejs-' . $file_id,
+            '#attributes' => $video_settings,
+        );
+//            field_view_field(
+//            'node',
+//            $node,
+//            'field_video_file',
+//            array(
+//                'type' => 'videojs',
+//                'label' => 'hidden',
+//                'settings' => $video_settings,
+//            )
+//        );
+
+
+        if ($video_render_array['#attributes']['width'] == 1) {
+            $video_render_array['#attributes']['width'] = '100%';
+        }
+
+        $video_output = $video_render_array;
+    }
+    return $video_output;
+}
+
 function construct_vimeo($node, $format_name, $field_name = 'field_video_id')
 {
     $vimeo_output = array();
@@ -42,25 +94,59 @@ function construct_vimeo($node, $format_name, $field_name = 'field_video_id')
         //vimeo video
         $vimeo_frame_size = _vimeo_settings($format_name);
         if ($vimeo_frame_size['width'] == 1 || $vimeo_frame_size['height'] == 1) {
-            $vimeo_output = '<iframe src="http://player.vimeo.com/video/' . $node->field_video_id[LANGUAGE_NONE][0]['value'] . '?badge=0" width="100%" height="100%" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+            $vimeo_output = '<iframe class="img-responsive" src="http://player.vimeo.com/video/' . $node->field_video_id[LANGUAGE_NONE][0]['value'] . '?badge=0" width="100%" height="100%" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
         } else {
-            $vimeo_output = '<iframe src="http://player.vimeo.com/video/' . $node->field_video_id[LANGUAGE_NONE][0]['value'] . '?badge=0" width="' . $vimeo_frame_size['width'] . 'px" height="' . $vimeo_frame_size['height'] . 'px" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+            $vimeo_output = '<iframe class="img-responsive" src="http://player.vimeo.com/video/' . $node->field_video_id[LANGUAGE_NONE][0]['value'] . '?badge=0" width="' . $vimeo_frame_size['width'] . 'px" height="' . $vimeo_frame_size['height'] . 'px" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
         }
     }
 
     return $vimeo_output;
 }
 
+function construct_vimeo_output($vimeo_id, $format_name = '')
+{
+    $vimeo_output = array();
+
+    if (isset($vimeo_id) && !empty($vimeo_id)) {
+        //vimeo video
+        $vimeo_frame_size = _vimeo_settings($format_name);
+        if ($vimeo_frame_size['width'] == 1 || $vimeo_frame_size['height'] == 1) {
+            $vimeo_output = '<iframe class="img-responsive"  src="http://player.vimeo.com/video/' . $vimeo_id . '?badge=0" width="100%" height="100%" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+        } else {
+            $vimeo_output = '<iframe class="img-responsive"  src="http://player.vimeo.com/video/' . $vimeo_id . '?badge=0" width="' . $vimeo_frame_size['width'] . '" height="' . $vimeo_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+        }
+    }
+
+    return $vimeo_output;
+}
+
+function construct_youtube_output($youtube_url, $format_name = '')
+{
+    $youtube_output = array();
+
+    if (isset($youtube_url) && !empty($youtube_url)) {
+        $youtube_frame_size = _youtube_settings($format_name);
+        if ($youtube_frame_size['width'] == 1 || $youtube_frame_size['height'] == 1) {
+//            $youtube_output = '<iframe src="http://' . $youtube_url . '" width="100%" height="100%" frameborder="0" allowFullScreen></iframe>';
+            $youtube_output = '<iframe class="img-responsive"  width="100%" height="100%" src="http://www.youtube.com/embed/' . $youtube_url . '" frameborder="0" allowfullscreen></iframe>';
+        } else {
+            $youtube_output = '<iframe class="img-responsive" src="http://www.youtube.com/embed/' . $youtube_url . '" width="' . $youtube_frame_size['width'] . '" height="' . $youtube_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+        }
+    }
+
+    return $youtube_output;
+}
+
 /*****SETTINGS********/
-function _videojs_settings($post_format)
+function _videojs_settings($post_format = '')
 {
     switch ($post_format) {
         case 'slider':
             $video_style = image_style_load('ds_blog_video_post_slider');
-            if(empty($video_style)){
+            if (empty($video_style)) {
                 $width = '570';
                 $height = '330';
-            }else{
+            } else {
                 $thumb_effect = array_shift($video_style['effects']);
                 $width = $thumb_effect['data']['width'];
                 $height = $thumb_effect['data']['height'];
@@ -68,10 +154,10 @@ function _videojs_settings($post_format)
             break;
         case 'Big':
             $video_style = image_style_load('ds_blog_video_post_big');
-            if(empty($video_style)){
+            if (empty($video_style)) {
                 $width = '780';
                 $height = '468';
-            }else{
+            } else {
                 $thumb_effect = array_shift($video_style['effects']);
                 $width = $thumb_effect['data']['width'];
                 $height = $thumb_effect['data']['height'];
@@ -79,14 +165,19 @@ function _videojs_settings($post_format)
             break;
         case 'Small':
             $video_style = image_style_load('ds_blog_video_post_small');
-            if(empty($video_style)){
+            if (empty($video_style)) {
                 $width = '370';
                 $height = '222';
-            }else{
+            } else {
                 $thumb_effect = array_shift($video_style['effects']);
                 $width = $thumb_effect['data']['width'];
                 $height = $thumb_effect['data']['height'];
             }
+            break;
+        case 'gallery_node':
+            $dimension = get_node_video_dimensions();
+            $width = $dimension['width'];
+            $height = $dimension['height'];
             break;
         default:
             $width = '200';
@@ -106,10 +197,10 @@ function _vimeo_settings($post_format)
     switch ($post_format) {
         case 'slider':
             $vimeo_style = image_style_load('ds_blog_vimeo_post_slider');
-            if(empty($vimeo_style)){
+            if (empty($vimeo_style)) {
                 $width = '320';
                 $height = '240';
-            }else{
+            } else {
                 $thumb_effect = array_shift($vimeo_style['effects']);
                 $width = $thumb_effect['data']['width'];
                 $height = $thumb_effect['data']['height'];
@@ -117,10 +208,10 @@ function _vimeo_settings($post_format)
             break;
         case 'Big':
             $vimeo_style = image_style_load('ds_blog_vimeo_post_big');
-            if(empty($vimeo_style)){
+            if (empty($vimeo_style)) {
                 $width = '624';
                 $height = '468';
-            }else{
+            } else {
                 $thumb_effect = array_shift($vimeo_style['effects']);
                 $width = $thumb_effect['data']['width'];
                 $height = $thumb_effect['data']['height'];
@@ -128,14 +219,19 @@ function _vimeo_settings($post_format)
             break;
         case 'Small':
             $vimeo_style = image_style_load('ds_blog_vimeo_post_small');
-            if(empty($vimeo_style)){
+            if (empty($vimeo_style)) {
                 $width = '200';
                 $height = '150';
-            }else{
+            } else {
                 $thumb_effect = array_shift($vimeo_style['effects']);
                 $width = $thumb_effect['data']['width'];
                 $height = $thumb_effect['data']['height'];
             }
+            break;
+        case 'gallery_node':
+            $dimension = get_node_video_dimensions();
+            $width = $dimension['width'];
+            $height = $dimension['height'];
             break;
         default:
             $width = '100%';
@@ -146,4 +242,61 @@ function _vimeo_settings($post_format)
         'width' => $width,
         'height' => $height,
     );
+}
+
+
+function _youtube_settings($post_format)
+{
+    switch ($post_format) {
+        case 'gallery_node':
+            $dimension = get_node_video_dimensions();
+            $width = $dimension['width'];
+            $height = $dimension['height'];
+            break;
+        default:
+            $width = '100%';
+            $height = '200';
+    }
+
+    return array(
+        'width' => $width,
+        'height' => $height,
+    );
+}
+
+function get_node_video_dimensions()
+{
+    $video_dimensions = & drupal_static(__FUNCTION__);
+
+    if (!isset($video_dimensions)) {
+        $video_dimensions = array();
+        $colums_node_width = array(
+            2 => '454',
+            3 => '292',
+            4 => '212',
+        );
+
+        $colums_node_height = array(
+            2 => '295',
+            3 => '190',
+            4 => '138',
+        );
+
+        $width = variable_get('ds_gallery_video_frame_width', 0);
+        if ($width == 1) {
+            $video_dimensions['width'] = '100%';
+        } elseif ($width == 0) {
+            $columns = variable_get('ds_gallery_node_settings_columns', 4);
+            $video_dimensions['width'] = $colums_node_width[$columns];
+        }
+
+        $height = variable_get('ds_gallery_video_frame_height', 0);
+        if ($height == 1) {
+            $video_dimensions['height'] = '100%';
+        } elseif ($height == 0) {
+            $columns = variable_get('ds_gallery_node_settings_columns', 4);
+            $video_dimensions['height'] = $colums_node_height[$columns];
+        }
+    }
+    return $video_dimensions;
 }

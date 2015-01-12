@@ -1,4 +1,82 @@
 <?php
+
+function ds_item_tapi($item, $video_format = ''){
+    $item_tapi = array();
+
+    //title
+    $item_tapi['title'] = (isset($item['title'])) ? $item['title'] : '';
+    //post with picture
+    $item_tapi['has_picture'] = false;
+    if (isset($item['image']) && !empty($item['image']) && ($item['image'] != '0')){
+        $item_tapi['has_picture'] = true;
+        $item_tapi['picture'] = array();
+        $file = file_load($item['image']);
+        $item_tapi['picture']['url'] = url('sites/default/files/' . file_uri_target($file->uri), array('absolute' => true));
+//        $item_tapi['picture']['alt'] = $node->field_blog_img[LANGUAGE_NONE][0]['alt'];
+//        $item_tapi['picture']['title'] = $node->field_blog_img[LANGUAGE_NONE][0]['title'];
+//        $img_post_size = _post_image_settings($post_format);
+//        if($img_post_size['width'] == 1 || $img_post_size['height'] == 1){
+//            $item_tapi['picture']['content'] = '<img src="'.$item_tapi['picture']['url'].'"  alt="'.$item_tapi['picture']['alt'].'" />';
+//        }else{
+//            $item_tapi['picture']['content'] = '<img src="'.$item_tapi['picture']['url'].'" width="'.$img_post_size['width'].'px" height="'.$img_post_size['height'].'px"  alt="'.$item_tapi['picture']['alt'].'" />';
+//        }
+    }
+//
+    $item_tapi['picture_dummy_url'] = base_path() . drupal_get_path('module','designssquare_lib') . '/assets/img/dummy_img.jpg';
+
+    module_load_include('inc', 'designssquare_lib', 'includes/ds_video_lib');
+
+    //video
+    $item_tapi['video']['content'] = '';
+    $item_tapi['video']['is_frame'] = FALSE;
+    $item_tapi['video']['is_ajax'] = FALSE;
+    if(isset($item['video']) && !empty($item['video'])) {
+        $content_raw = construct_videojs($item['video'], $video_format);
+        $item_tapi['video']['content'] = render($content_raw);
+        $item_tapi['video']['url'] = base_path().'ds-gallery-popup/video/'.$item['video'];
+//        $item_tapi['video']['is_ajax'] = TRUE;
+                $item_tapi['video']['is_frame'] = TRUE;
+    }else{
+        $item_tapi['video']['content'] = NULL;
+    }
+//    $item_tapi['video']['content'] = render($video_output);
+    if(!isset($item_tapi['video']['content']) || empty($item_tapi['video']['content'])){
+        //see if there is vimeo video
+        if(isset($item['vimeo_id'])){
+            $item_tapi['video']['url'] = 'http://player.vimeo.com/video/' . $item['vimeo_id'] . '?badge=0';
+            $item_tapi['video']['content'] = construct_vimeo_output($item['vimeo_id'], $video_format);
+            $item_tapi['video']['is_frame'] = TRUE;
+        }
+    }
+
+    if(!isset($item_tapi['video']['content']) || empty($item_tapi['video']['content'])){
+        //see if there is youtube video
+        if(isset($item['youtube_url']) && !empty($item['youtube_url'])){
+            $item_tapi['video']['content'] =  construct_youtube_output($item['youtube_url'], $video_format);
+            $item_tapi['video']['url'] = 'http://www.youtube.com/embed/' . $item['youtube_url'];
+            $item_tapi['video']['is_frame'] = TRUE;
+        }
+    }
+    $item_tapi['has_video'] = (empty($item_tapi['video']['content'])) ? FALSE : TRUE;
+
+//
+//    //post with audio
+//    $item_tapi['has_audio'] = false;
+//    if (!empty($node->field_audio)) {
+//        module_load_include('inc', 'designssquare_lib', 'includes/ds_audio_lib');
+//        $audio_output = construct_audio($node);
+//        $item_tapi['has_audio'] = (!empty($audio_output)) ? TRUE : FALSE;
+//        $item_tapi['audio']['content'] = render($audio_output);
+//    }
+
+    //@ToDo tags come here
+    $item_tapi['tags'] = array();
+    $item_tapi['tags']['name'] = $item['ds_gallery_item_tag'];
+    $item_tapi['tags']['raw'] = explode(', ', $item['ds_gallery_item_tag']);
+    $item_tapi['tags']['flatten_names'] = implode(' ', $item_tapi['tags']['raw']);
+    return $item_tapi;
+}
+
 //
 ///*******Theme Custom Settings******/
 //function _theme_settings($theme_name){
@@ -218,130 +296,6 @@
 //}
 //
 //
-///******GALLERY*******/
-//function _gallery_teaser_tapi($gallery)
-//{
-//    module_load_include('module', 'designssquare_lib');
-//    $gallery_tapi = array();
-//
-//    if(isset($gallery)) {
-//        $gallery_tapi['url'] = base_path().drupal_get_path_alias('node/' . $gallery->nid); //url to a project
-//        $gallery_tapi['title'] = $gallery->title;
-//
-//        $field_instance = field_get_items('node', $gallery, 'field_ds_gallery_page_intro');
-//        $field_value = ($field_instance) ? field_view_value('node', $gallery, 'field_ds_gallery_page_intro', $field_instance[0]) : '';
-//        $gallery_tapi['intro'] = htmlspecialchars_decode(render($field_value));
-//
-//        $field_instance = field_get_items('node', $gallery, 'field_ds_gallery_summary');
-//        $field_value = ($field_instance) ? field_view_value('node', $gallery, 'field_ds_gallery_summary', $field_instance[0]) : '';
-//        $gallery_tapi['summary'] = htmlspecialchars_decode(render($field_value));
-//        $field_instance = field_get_items('node', $gallery, 'field_ds_gallery_featured_img');
-//        $field_value = ($field_instance) ? array_shift($field_instance) : '';
-//        $gallery_tapi['featured_img'] = array();
-//        $gallery_tapi['featured_img']['url'] = (isset($field_value['uri'])) ? file_create_url($field_value['uri']) : '';
-//        $gallery_tapi['featured_img']['alt'] = (isset($field_value['alt'])) ? $field_value['alt'] : '';
-//        //images size for the teaser
-//        $image_style = image_style_load('ds_foto_gallery_teaser');
-//        if(empty($image_style)){
-//            $gallery_tapi['featured_img']['width'] = '';
-//            $gallery_tapi['featured_img']['height'] = '';
-//        }else{
-//            $thumb_effect = array_shift($image_style['effects']);
-//            $gallery_tapi['featured_img']['width'] = $thumb_effect['data']['width'].'px';
-//            $gallery_tapi['featured_img']['height'] = $thumb_effect['data']['height'].'px';
-//        }
-//
-//        //images size for the block
-//        $gallery_tapi['block_img'] = array();
-//        $image_style = image_style_load('ds_foto_gallery_block');
-//        if(empty($image_style)){
-//            $gallery_tapi['block_img']['width'] = '';
-//            $gallery_tapi['block_img']['height'] = '';
-//        }else{
-//            $thumb_effect = array_shift($image_style['effects']);
-//            $gallery_tapi['block_img']['width'] = $thumb_effect['data']['width'].'px';
-//            $gallery_tapi['block_img']['height'] = $thumb_effect['data']['height'].'px';
-//        }
-//
-//    }else{
-//        $gallery_tapi['url'] = ''; //url to a project
-//        $gallery_tapi['title'] = '';
-//        $gallery_tapi['summary'] = '';
-//        $gallery_tapi['featured_img'] = array();
-//        $gallery_tapi['featured_img']['url'] = '';
-//        $gallery_tapi['featured_img']['alt'] = '';
-//    }
-//
-//    //provide contextual links
-//    $gallery_tapi['ds_contextual_links'] = node_contextual_links($gallery);
-//
-//    return $gallery_tapi;
-//}
-//
-//function _gallery_tapi($node)
-//{
-//    $gallery_tapi = _gallery_teaser_tapi($node);
-//
-//    //resize image at focus
-//    $gallery_tapi['gallery_focus_img'] = array();
-//    $image_style = image_style_load('ds_foto_gallery_single');
-//    if(empty($image_style)){
-//        $gallery_tapi['gallery_focus_img']['width'] = '';
-//        $gallery_tapi['gallery_focus_img']['height'] = '';
-//    }else{
-//        $thumb_effect = array_shift($image_style['effects']);
-//        $gallery_tapi['gallery_focus_img']['width'] = $thumb_effect['data']['width'].'px';
-//        $gallery_tapi['gallery_focus_img']['height'] = $thumb_effect['data']['height'].'px';
-//    }
-//
-//    if (isset($node) && !empty($node)) {
-//        $field_instance = field_get_items('node', $node, 'body');
-//        $content = ($field_instance) ? field_view_value('node', $node, 'body', $field_instance[0]) : '';
-//        $gallery_tapi['content'] = render($content);
-//        $gallery_tapi['index'] = array();
-//        $gallery_tapi['index']['next'] = array();
-//        $id_next_node = next_node($node);
-//        if (isset($id_next_node)) {
-//            $gallery_tapi['index']['next']['is_present'] = TRUE;
-//            $gallery_tapi['index']['next']['url'] = base_path() . drupal_get_path_alias('node/' . $id_next_node);
-//            $gallery_tapi['index']['next']['text'] = t('Next');
-//        } else {
-//            $gallery_tapi['index']['next']['is_present'] = FALSE;
-//        }
-//
-//        $id_previous_node = previous_node($node);
-//        $gallery_tapi['index']['previous'] = array();
-//        if (isset($id_previous_node)) {
-//            $gallery_tapi['index']['previous']['is_present'] = TRUE;
-//            $gallery_tapi['index']['previous']['text'] = t('Previous');
-//            $gallery_tapi['index']['previous']['url'] = base_path() . drupal_get_path_alias('node/' . $id_previous_node);
-//        } else {
-//            $gallery_tapi['index']['previous']['is_present'] = FALSE;
-//        }
-//
-//        $gallery_tapi['gallery_img'] = array();
-//        $field_instance = field_get_items('node', $node, 'field_ds_gallery_images');
-//        if(isset($field_instance) && is_array($field_instance)){
-//            foreach ($field_instance as $key => $gallery_img) {
-//                $gallery_tapi['gallery_img'][$key]['url'] = (isset($gallery_img['uri'])) ? file_create_url($gallery_img['uri']) : '';
-//                $gallery_tapi['gallery_img'][$key]['alt'] = (isset($gallery_img['alt'])) ? $gallery_img['alt'] : '';
-//                $gallery_tapi['gallery_img'][$key]['title'] = (isset($gallery_img['title'])) ? $gallery_img['title'] : '';
-//            }
-//        }
-//    } else {
-//        $gallery_tapi['content'] = '';
-//        $gallery_tapi['index'] = array();
-//        $gallery_tapi['index']['next'] = array();
-//        $gallery_tapi['index']['next']['url'] = '';
-//        $gallery_tapi['index']['next']['text'] = '';
-//        $gallery_tapi['index']['previous'] = array();
-//        $gallery_tapi['index']['previous']['text'] = '';
-//        $gallery_tapi['index']['previous']['url'] = '';
-//        $gallery_tapi['gallery_img'] = array();
-//    }
-//
-//    return $gallery_tapi;
-//}
 ///*****SERVICE*******/
 //function _service_teaser_tapi($service)
 //{
