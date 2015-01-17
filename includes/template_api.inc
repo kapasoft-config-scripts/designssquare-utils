@@ -774,13 +774,14 @@ function _ds_retrieve_items_tags($items){
 //    );
 //}
 //
-////prepare site related variables for the html.tpl file
-////function _basic_tapi($node){
-////    return array(
-////        'slogan' => (!empty($node->field_slogan)) ? $node->field_slogan[LANGUAGE_NONE][0]['value'] : '',
-////        'title' => (!empty($node->title)) ? $node->title : '',
-////    );
-////}
+//prepare site related variables for the html.tpl file
+function _basic_tapi($node){
+    return array(
+        'slogan' => (!empty($node->field_slogan)) ? $node->field_slogan[LANGUAGE_NONE][0]['value'] : '',
+        'title' => (!empty($node->title)) ? $node->title : '',
+    );
+}
+
 //function _basic_tapi($node)
 //{
 //    $field = field_get_items('node', $node, 'field_page_slogan');

@@ -417,7 +417,7 @@ function get_node_from_cache()
         $node_raw = get_raw_node_from_cache();
         $current_node = null;
         if ($node_raw) {
-            $current_node = $node_raw['#node'];
+            $current_node = (isset($node_raw['#node'])) ? $node_raw['#node'] : NULL;
         } else {
             //cache not set, lets try to load from path
             if ((arg(0) == 'node') && arg(1) && is_numeric(arg(1))) {
@@ -429,7 +429,6 @@ function get_node_from_cache()
 }
 
 //retrieve currently loaded node in form of renderable array from content cache
-//@return stdClass of the Node or Null if no node set in the content cache
 function get_raw_node_from_cache()
 {
     $current_node = & drupal_static(__FUNCTION__);
