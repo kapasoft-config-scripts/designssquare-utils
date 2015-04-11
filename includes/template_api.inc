@@ -83,9 +83,9 @@ function _default_val_content($choice, $key, $form_val)
         //see if the value already entered for the content_choice
         $default_val = '';
         ((isset($form_val['image']) && is_numeric($form_val['image']) && $form_val['image']) ||
-            (isset($form_val['image']['fid']) && is_numeric($form_val['image']['fid']) && $form_val['image']['fid'])) ? $default_val = 'image' : '';
+            (isset($form_val['image']['fid']) && is_numeric($form_val['image']['fid']) && isset($form_val['image']['fid']))) ? $default_val = 'image' : '';
         ((isset($form_val['video']) && is_numeric($form_val['video']) && $form_val['video']) ||
-            (isset($form_val['video']['fid']) && is_numeric($form_val['video']['fid']) && $form_val['video']['fid'])) ? $default_val = 'local_video' : '';
+            (isset($form_val['video']['fid']) && is_numeric($form_val['video']['fid']) && isset($form_val['video']['fid']))) ? $default_val = 'local_video' : '';
         (isset($form_val['text']) && !empty($form_val['text'])) ? $default_val = 'text' : '';
         (isset($form_val['youtube_url']) && !empty($form_val['youtube_url'])) ? $default_val = 'youtube' : '';
         (isset($form_val['vimeo_id']) && !empty($form_val['vimeo_id'])) ? $default_val = 'vimeo' : '';
@@ -106,7 +106,8 @@ function _ds_retrieve_items_tags($items){
         foreach($tags as $tag){
             $tag_names['collection'][$tag] =  array();
             $tag_names['collection'][$tag]['name'] = $tag;
-            $tag_names['collection'][$tag]['safe_name'] = str_replace(' ', '_', strtolower($tag));
+//            $tag_names['collection'][$tag]['safe_name'] = str_replace(' ', '_', strtolower($tag));
+            $tag_names['collection'][$tag]['safe_name'] = str_replace(' ', '_', $tag);
         }
     }
 //    $tag_names['names'] = array_unique($tag_names['collection']);
