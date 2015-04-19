@@ -187,40 +187,44 @@ function include_blocks(&$vars, $scope = 'page')
 
     foreach (system_region_list($GLOBALS['theme']) as $region_key => $region_name) {
 
-        if (block_get_blocks_by_region($region_key)) {
-            $blocks = block_get_blocks_by_region($region_key);
-        }
+        $vars['region'][$region_key] = & drupal_static(__FUNCTION__ . $region_key);
 
-        if (!empty($ctx_plugin) && ($region_key !== 'content')) {
+        if (!isset($vars['region'][$region_key])) {
 
-            //load blocks to cache them to avoid
-            $list = $ctx_plugin->block_list($region_key);
-            _block_render_blocks($list);
-
-            if ($scope == 'html') {
-                //blocks not build in html scope, so we build it manually
-                $region_blocks = $ctx_plugin->block_list($region_key);
-                $ctx_blocks = _block_get_renderable_array(_block_render_blocks($region_blocks));
-            } else {
-                $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
+            if (block_get_blocks_by_region($region_key)) {
+                $blocks = block_get_blocks_by_region($region_key);
             }
-        }
 
-        $all_blocks = array_merge($blocks, $ctx_blocks);
+            if (!empty($ctx_plugin) && ($region_key !== 'content')) {
 
-        //sort the blocks merged
-        $all_blocks['#sorted'] = FALSE;
+                //load blocks to cache them to avoid
+                $list = $ctx_plugin->block_list($region_key);
+                _block_render_blocks($list);
 
-        //maintain weights
-        foreach ($all_blocks as &$block) {
-            if (isset($block['#block']->weight)) {
-                $block['#weight'] = $block['#block']->weight;
+                if ($scope == 'html') {
+                    //blocks not build in html scope, so we build it manually
+                    $region_blocks = $ctx_plugin->block_list($region_key);
+                    $ctx_blocks = _block_get_renderable_array(_block_render_blocks($region_blocks));
+                } else {
+                    $ctx_blocks = $ctx_plugin->block_get_blocks_by_region($region_key);
+                }
             }
+
+            $all_blocks = array_merge($blocks, $ctx_blocks);
+
+            //sort the blocks merged
+            $all_blocks['#sorted'] = FALSE;
+
+            //maintain weights
+            foreach ($all_blocks as &$block) {
+                if (isset($block['#block']->weight)) {
+                    $block['#weight'] = $block['#block']->weight;
+                }
+            }
+
+            // add it to the $region variable
+            $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
         }
-
-        // add it to the $region variable
-        $vars['region'][$region_key] = (isset($all_blocks) && !empty($all_blocks)) ? $all_blocks : array();
-
         //reset arrays
         $all_blocks = array();
         $blocks = array();
@@ -361,7 +365,7 @@ function is_taxonomy($type)
 }
 
 
-//returns appropriate template file. It first check it there is one in the theme scope, then it looks in the modules
+//returns appropriate template file. It first checks if there is one in the theme scope, then it looks in the modules
 function get_template_path($module_name, $template_name)
 {
     $path_to_template = '';
@@ -1391,18 +1395,18 @@ function rebuild_breadcrumbs($active_trail, $item, $options)
  * @return array
  *      array with breadcrumb element ready to be passed into rebuild_breadcrumbs
  */
-function get_breadcrumb_category_options($node, $category_field_reference){
-             $breadcrumb_element_ins = field_get_items('node', $node, $category_field_reference);
-            $temp_view = field_view_value('node', $node, $category_field_reference, $breadcrumb_element_ins[0]);
-            $breadcrumb_element_value = render($temp_view);
-            $options = array(
-                'title' => $breadcrumb_element_value,
-                'href' => drupal_get_path_alias('node/' . $node->nid),
-                'localized_options' => array(),
-            );
+function get_breadcrumb_category_options($node, $category_field_reference)
+{
+    $breadcrumb_element_ins = field_get_items('node', $node, $category_field_reference);
+    $temp_view = field_view_value('node', $node, $category_field_reference, $breadcrumb_element_ins[0]);
+    $breadcrumb_element_value = render($temp_view);
+    $options = array(
+        'title' => $breadcrumb_element_value,
+        'href' => drupal_get_path_alias('node/' . $node->nid),
+        'localized_options' => array(),
+    );
     return $options;
 }
-
 
 
 /**
@@ -1465,11 +1469,13 @@ function extract_all_nodes($vars)
  * @param $form
  * @param $form_state
  */
-function ds_theme_rebuild($form, $form_state){
-    if(_is_registry_rebuild($form, $form_state)){
+function ds_theme_rebuild($form, $form_state)
+{
+    if (_is_registry_rebuild($form, $form_state)) {
         //@ToDo fix to clear cache for permanent links such as ds-gallery as well
         drupal_flush_all_caches();
-//        system_cron();
+        system_cron();
+        drupal_flush_all_caches();
 //        admin_menu_flush_caches();
     }
 }
@@ -1480,10 +1486,11 @@ function ds_theme_rebuild($form, $form_state){
  * @return bool
  */
 
-function _is_registry_rebuild($form, $form_state){
+function _is_registry_rebuild($form, $form_state)
+{
     $status = FALSE;
-    foreach($form['#old_values'] as $key => $setting){
-        if($setting != $form_state['input'][$key]){
+    foreach ($form['#old_values'] as $key => $setting) {
+        if ($setting != $form_state['input'][$key]) {
             $status = TRUE;
             break;
         }
