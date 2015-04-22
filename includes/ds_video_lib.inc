@@ -42,9 +42,6 @@ function construct_video($node, $format_name, $field_name = 'field_video_file')
 function construct_videojs($file_id, $format_name = '')
 {
     if (!module_exists('videojs')) {
-//        module_load_include('module', 'videojs');
-//        videojs_add();
-//    }else{
         watchdog('designssquare_com_widget_gallery', 'VideoJs module is not present', NULL, WATCHDOG_ALERT);
     }
 
@@ -76,11 +73,12 @@ function construct_videojs($file_id, $format_name = '')
 //            )
 //        );
 
-
         if ($video_render_array['#attributes']['width'] == 1) {
             $video_render_array['#attributes']['width'] = '100%';
         }
-
+        if ($video_render_array['#attributes']['height'] == 1) {
+            $video_render_array['#attributes']['height'] = '100%';
+        }
         $video_output = $video_render_array;
     }
     return $video_output;
@@ -113,7 +111,7 @@ function construct_vimeo_output($vimeo_id, $format_name = '')
         if ($vimeo_frame_size['width'] == 1 || $vimeo_frame_size['height'] == 1) {
             $vimeo_output = '<iframe class="img-responsive"  src="http://player.vimeo.com/video/' . $vimeo_id . '?badge=0" width="100%" height="100%" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
         } else {
-            $vimeo_output = '<iframe class="img-responsive"  src="http://player.vimeo.com/video/' . $vimeo_id . '?badge=0" width="' . $vimeo_frame_size['width'] . '" height="' . $vimeo_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+            $vimeo_output = '<iframe src="http://player.vimeo.com/video/' . $vimeo_id . '?badge=0" width="' . $vimeo_frame_size['width'] . '" height="' . $vimeo_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
         }
     }
 
@@ -130,7 +128,7 @@ function construct_youtube_output($youtube_url, $format_name = '')
 //            $youtube_output = '<iframe src="http://' . $youtube_url . '" width="100%" height="100%" frameborder="0" allowFullScreen></iframe>';
             $youtube_output = '<iframe class="img-responsive"  width="100%" height="100%" src="http://www.youtube.com/embed/' . $youtube_url . '" frameborder="0" allowfullscreen></iframe>';
         } else {
-            $youtube_output = '<iframe class="img-responsive" src="http://www.youtube.com/embed/' . $youtube_url . '" width="' . $youtube_frame_size['width'] . '" height="' . $youtube_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+            $youtube_output = '<iframe src="http://www.youtube.com/embed/' . $youtube_url . '" width="' . $youtube_frame_size['width'] . '" height="' . $youtube_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
         }
     }
 
@@ -270,6 +268,7 @@ function get_node_video_dimensions()
 
     if (!isset($video_dimensions)) {
         $video_dimensions = array();
+        //default settings vor video
         $colums_node_width = array(
             2 => '454',
             3 => '292',
@@ -282,20 +281,21 @@ function get_node_video_dimensions()
             4 => '138',
         );
 
-        $width = variable_get('ds_gallery_video_frame_width', 0);
-        if ($width == 1) {
+        module_load_include('inc', 'designssquare_com_widget_gallery', 'inc/gallery-template-api');
+        $gallery_settings = _gallery_style_tapi();
+        if (!empty($gallery_settings['node_thumb']['ui_style'])) {
+            //scaling from UI
+            $video_dimensions['width'] = $gallery_settings['node_thumb']['width'];
+            $video_dimensions['height'] = $gallery_settings['node_thumb']['height'];
+        } elseif (!empty($gallery_settings['node_thumb']['design_style'])) {
+            //100% width with default height
             $video_dimensions['width'] = '100%';
-        } elseif ($width == 0) {
-            $columns = variable_get('ds_gallery_node_settings_columns', 4);
-            $video_dimensions['width'] = $colums_node_width[$columns];
-        }
-
-        $height = variable_get('ds_gallery_video_frame_height', 0);
-        if ($height == 1) {
-            $video_dimensions['height'] = '100%';
-        } elseif ($height == 0) {
+            $video_dimensions['height'] = $gallery_settings['node_thumb']['height'];
+        } else {
+            $video_dimensions['width'] = '100%';
             $columns = variable_get('ds_gallery_node_settings_columns', 4);
             $video_dimensions['height'] = $colums_node_height[$columns];
+
         }
     }
     return $video_dimensions;

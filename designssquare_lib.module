@@ -1269,7 +1269,11 @@ function get_menu_links($name)
 function ds_build_menu($menu_id)
 {
     $menu_tree = menu_tree($menu_id);
-    return (isset($menu_tree) && !empty($menu_tree)) ? theme('menu_tree', array('element' => $menu_tree)) : '';
+    $param = array(
+        'element' => $menu_tree,
+//        'tree' => array('#children' => array())    //@ToDo temp fix to avoid undefined $variables['tree']['#children'] in template_preprocess_menu_tree
+    );
+    return (isset($menu_tree) && !empty($menu_tree)) ? theme('menu_tree', $param) : '';
 }
 
 
