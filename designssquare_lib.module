@@ -1501,3 +1501,4 @@ function _is_registry_rebuild($form, $form_state)
     }
     return $status;
 }
+
