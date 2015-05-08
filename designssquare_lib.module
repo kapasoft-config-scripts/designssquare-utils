@@ -1,5 +1,4 @@
 <?php
-
 /*
  * disable wysiwyg editor for comments
  *
@@ -58,10 +57,56 @@ function designssquare_lib_js_alter(&$javascript)
             'every_page' => false,
             'defer' => false,
             'preprocess' => true,
+            'cache' => true,
             'version' => null,
             'data' => 'window.BASE_URL="/";'
         );
     }
+
+    //IE9 legacy support
+    require_once dirname(__FILE__) . '/libs/Browser.php';
+    $browser = new Browser;
+    watchdog('designssquare_lib', 'browser: ' . $browser->getBrowser() . '; ver:' . $browser->getVersion(), array(), WATCHDOG_INFO);
+    if ($browser->getBrowser() == Browser::BROWSER_IE && $browser->getVersion() == '9.0') {
+        $ie_js_support = base_path() . drupal_get_path('module', 'designssquare_lib') . '/js/crossbrowser-support/ie9-legacy-support.js';
+        $javascript[$ie_js_support] = array(
+            'scope' => "header",
+            'type' => "file",
+            'weight' => "0.5",
+            'group' => "0",
+            'every_page' => false,
+            'defer' => false,
+            'preprocess' => true,
+            'version' => "0.1",
+            'cache' => true,
+            'data' => $ie_js_support,
+        );
+
+
+        $targets = array();
+        drupal_alter('ie_legacy_support', $targets);
+        if (!empty($targets)) {
+            $inline_js = 'jQuery(document).ready(function() {' . "\n";
+            $target_flat = implode(',', $targets);
+            $inline_js .= 'DS_LIB_LEGACY.init("' . $target_flat . '");' . "\n";
+            $inline_js .= 'DS_LIB_LEGACY.turnOnDebug();' . "\n";
+            $inline_js .= ' });' . "\n";
+
+            $javascript[] = array(
+                'scope' => "footer",
+                'type' => "inline",
+                'weight' => "100",
+                'group' => "1",
+                'every_page' => false,
+                'defer' => false,
+                'cache' => true,
+                'preprocess' => true,
+                'version' => null,
+                'data' => $inline_js,
+            );
+        }
+    }
+
 
 }
 
