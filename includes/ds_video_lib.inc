@@ -126,9 +126,9 @@ function construct_youtube_output($youtube_url, $format_name = '')
         $youtube_frame_size = _youtube_settings($format_name);
         if ($youtube_frame_size['width'] == 1 || $youtube_frame_size['height'] == 1) {
 //            $youtube_output = '<iframe src="http://' . $youtube_url . '" width="100%" height="100%" frameborder="0" allowFullScreen></iframe>';
-            $youtube_output = '<iframe class="img-responsive"  width="100%" height="100%" src="http://www.youtube.com/embed/' . $youtube_url . '" frameborder="0" allowfullscreen></iframe>';
+            $youtube_output = '<iframe class="img-responsive"  width="100%" height="100%" src="http://www.youtube.com/embed/' . $youtube_url . '?wmode=transparent" frameborder="0" allowfullscreen wmode="Opaque"></iframe>';
         } else {
-            $youtube_output = '<iframe src="http://www.youtube.com/embed/' . $youtube_url . '" width="' . $youtube_frame_size['width'] . '" height="' . $youtube_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+            $youtube_output = '<iframe src="http://www.youtube.com/embed/' . $youtube_url . '?wmode=transparent" width="' . $youtube_frame_size['width'] . '" height="' . $youtube_frame_size['height'] . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen wmode="Opaque"></iframe>';
         }
     }
 
