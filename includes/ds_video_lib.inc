@@ -252,8 +252,8 @@ function _youtube_settings($post_format)
             $height = $dimension['height'];
             break;
         default:
-            $width = '100%';
-            $height = '200';
+            $width = '1';
+            $height = '1';
     }
 
     return array(
@@ -272,13 +272,13 @@ function get_node_video_dimensions()
         $colums_node_width = array(
             2 => '454',
             3 => '292',
-            4 => '212',
+            4 => '1',
         );
 
         $colums_node_height = array(
             2 => '295',
             3 => '190',
-            4 => '138',
+            4 => '1',
         );
 
         module_load_include('inc', 'designssquare_com_widget_gallery', 'inc/gallery-template-api');
@@ -295,7 +295,6 @@ function get_node_video_dimensions()
             $video_dimensions['width'] = '100%';
             $columns = variable_get('ds_gallery_node_settings_columns', 4);
             $video_dimensions['height'] = $colums_node_height[$columns];
-
         }
     }
     return $video_dimensions;
