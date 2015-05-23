@@ -111,7 +111,7 @@ function _ds_retrieve_items_tags($items){
         }
     }
 //    $tag_names['names'] = array_unique($tag_names['collection']);
-    $tag_names['flatten_safe_names']= array_reduce($tag_names['collection'], '_merge_safe_names');
+    $tag_names['flatten_safe_names']= array_reduce($tag_names['collection'], 'merge_safe_names');
     return $tag_names;
 }
 

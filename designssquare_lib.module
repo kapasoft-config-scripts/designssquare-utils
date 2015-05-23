@@ -837,7 +837,8 @@ function import_flex_slider($options = array())
 //    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider-2.0.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
         drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/libs/FlexSlider/jquery.flexslider.js', array('scope' => 'header', 'type' => 'file', 'weight' => 4));
 //    $inline_js = 'jQuery.noConflict()(function ($) {' . "\n";
-        $inline_js = 'jQuery(window).load(function() {' . "\n";
+        $inline_js = '(function($) {' . "\n";
+        $inline_js .= '$(window).load(function() {' . "\n";
         $inline_js .= '    $(\'.' . $options['slider_id'] . '\').flexslider({
                                                         namespace: "' . $namespace . '",
                                                         selector: "' . $selector . '",
@@ -884,6 +885,7 @@ function import_flex_slider($options = array())
                                                         move: ' . $move . ',
                                                         });' . "\n";
         $inline_js .= '});' . "\n";
+        $inline_js .= '})(jQuery);'. "\n";
 //    $inline_js .= '});' . "\n";
         drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 5));
     }
@@ -1082,6 +1084,25 @@ function import_rev_slider($slider_id = 'banner', $options = array())
     drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 6));
 
     return $slider_tapi;
+}
+/**
+ *imports all js libraries and enable equalizer for elements with provided id
+ * @param: $options
+ *      'id' -  id of the jQuery objects
+ *      'height' - for fixed height equalizer
+ *
+**/
+function import_media_equalizer($options){
+    drupal_add_js(drupal_get_path('module', 'designssquare_lib') . '/js/ds-jslib/media-equalizer.js', array('scope' => 'footer', 'type' => 'file', 'weight' => 4));
+    $inline_js = 'jQuery(document).ready(function() {' . "\n";
+    if (!isset($options['height']) || empty($options['height'])) {
+        $inline_js .= 'DS_EQUALIZER.equalize({target_id: \''.$options['id'].'\'})' . "\n";
+    } else {
+        $inline_js .= 'DS_EQUALIZER.equalize({target_id: \''.$options['id'].'\', height: \'' . $options['height'] . '\'})' . "\n";
+    }
+    $inline_js .= ' });' . "\n";
+    drupal_add_js($inline_js, array('scope' => 'footer', 'type' => 'inline', 'weight' => 5));
+
 }
 
 
@@ -1316,9 +1337,14 @@ function ds_build_menu($menu_id)
     $menu_tree = menu_tree($menu_id);
     $param = array(
         'element' => $menu_tree,
-//        'tree' => array('#children' => array())    //@ToDo temp fix to avoid undefined $variables['tree']['#children'] in template_preprocess_menu_tree
+//        'tree' => array('#children' => $menu_tree)    //@ToDo temp fix to avoid undefined $variables['tree']['#children'] in template_preprocess_menu_tree
     );
-    return (isset($menu_tree) && !empty($menu_tree)) ? theme('menu_tree', $param) : '';
+    if(isset($menu_tree) && !empty($menu_tree)) {
+        return theme('menu_tree', $param);
+    }else{
+        //menu not found
+        return '';
+    }
 }
 
 
@@ -1547,3 +1573,7 @@ function _is_registry_rebuild($form, $form_state)
     return $status;
 }
 
+function merge_safe_names($carry, $tag)
+{
+    return $carry . ' ' . $tag['safe_name'];
+}
